@@ -122,11 +122,12 @@ INSERT INTO order_item (
 );
 
 -- 6) restaurant owners + restaurants + meals ("Green Fork Bistro", "Green Bowl", "Fit Kitchen")
+-- DEV login (all three): Restaurant123!
 INSERT INTO app_user (user_type, full_name, email, password_hash, phone)
 VALUES
-    ('restaurant', 'Yousef Al-Ghamdi', 'greenfork.owner@example.com', '$2b$10$placeholderhashvalueforrestaurant3000000000000', '+966504567890'),
-    ('restaurant', 'Sara Al-Fahad', 'greenbowl.owner@example.com', '$2b$10$placeholderhashvalueforrestaurant1000000000000', '+966502345678'),
-    ('restaurant', 'Faisal Al-Mutairi', 'fitkitchen.owner@example.com', '$2b$10$placeholderhashvalueforrestaurant2000000000000', '+966503456789');
+    ('restaurant', 'Yousef Al-Ghamdi', 'greenfork.owner@example.com', '$argon2id$v=19$m=65536,t=3,p=4$3dubU2otpfQeg1BKSSnFuA$orMI0X8GYVn0yvN9fUAEvmBmeha7KwpIV5KKUD500nM', '+966504567890'),
+    ('restaurant', 'Sara Al-Fahad', 'greenbowl.owner@example.com', '$argon2id$v=19$m=65536,t=3,p=4$3dubU2otpfQeg1BKSSnFuA$orMI0X8GYVn0yvN9fUAEvmBmeha7KwpIV5KKUD500nM', '+966502345678'),
+    ('restaurant', 'Faisal Al-Mutairi', 'fitkitchen.owner@example.com', '$argon2id$v=19$m=65536,t=3,p=4$3dubU2otpfQeg1BKSSnFuA$orMI0X8GYVn0yvN9fUAEvmBmeha7KwpIV5KKUD500nM', '+966503456789');
 
 INSERT INTO restaurant (user_id, restaurant_name, description, is_verified, logo_url)
 VALUES

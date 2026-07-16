@@ -21,11 +21,13 @@ VALUES (
 
 -- ============================================================
 -- 2 RESTAURANT OWNER ACCOUNTS (app_user)
+-- DEV login (both): Restaurant123!
+-- (Argon2 hash below. CHANGE THIS PASSWORD before any production use.)
 -- ============================================================
 INSERT INTO app_user (user_type, full_name, email, password_hash, phone)
 VALUES
-    ('restaurant', 'Sara Al-Fahad', 'greenbowl.owner@example.com', '$2b$10$placeholderhashvalueforrestaurant1000000000000', '+966502345678'),
-    ('restaurant', 'Faisal Al-Mutairi', 'fitkitchen.owner@example.com', '$2b$10$placeholderhashvalueforrestaurant2000000000000', '+966503456789');
+    ('restaurant', 'Sara Al-Fahad', 'greenbowl.owner@example.com', '$argon2id$v=19$m=65536,t=3,p=4$3dubU2otpfQeg1BKSSnFuA$orMI0X8GYVn0yvN9fUAEvmBmeha7KwpIV5KKUD500nM', '+966502345678'),
+    ('restaurant', 'Faisal Al-Mutairi', 'fitkitchen.owner@example.com', '$argon2id$v=19$m=65536,t=3,p=4$3dubU2otpfQeg1BKSSnFuA$orMI0X8GYVn0yvN9fUAEvmBmeha7KwpIV5KKUD500nM', '+966503456789');
 
 -- ============================================================
 -- 2 RESTAURANTS (linked to the two accounts above)
