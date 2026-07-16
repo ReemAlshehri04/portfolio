@@ -1,11 +1,21 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { authRequest } from "../../services/auth";
+import { useAuth } from "../../context/AuthContext";
 
 function AdminCustomers() {
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [pendingRestaurants, setPendingRestaurants] = useState(0);
+
+  const handleLogout = () => {
+    logout();
+    navigate("/admin/login");
+  };
 
   useEffect(() => {
     authRequest("/api/admin/customers")
@@ -35,6 +45,7 @@ function AdminCustomers() {
         .admin-nav-item.active { background: #e8f5e9; color: #325f3f; font-weight: 600; }
         .admin-nav-item .material-symbols-outlined { font-size: 20px; }
         .admin-sidebar-footer { padding: 16px 24px; border-top: 1px solid #e8ebe8; font-size: 12px; color: #717971; }
+        .admin-logout-btn { width: 100%; background: none; border: none; color: #b3261e; font-size: 13px; font-weight: 600; cursor: pointer; padding: 0; text-align: left; }
         .pending-badge { background: #fce4ec; color: #c62828; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 20px; margin-left: 8px; }
 
         .admin-main { margin-left: 260px; flex: 1; padding: 40px 48px; }
@@ -80,7 +91,9 @@ function AdminCustomers() {
               Orders
             </a>
           </nav>
-          <div className="admin-sidebar-footer">© 2025 Qooti</div>
+          <div className="admin-sidebar-footer">
+            <button className="admin-logout-btn" onClick={handleLogout}>Log Out</button>
+          </div>
         </aside>
 
         <main className="admin-main">

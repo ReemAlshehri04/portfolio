@@ -1,8 +1,24 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { authRequest } from "../../services/auth";
+import { useAuth } from "../../context/AuthContext";
+
+const RESTAURANT_STATUS_COLORS = {
+  Approved: { bg: "#e8f5e9", color: "#2e7d32" },
+  Pending: { bg: "#fff8e1", color: "#b06000" },
+  Rejected: { bg: "#fce4ec", color: "#b3261e" },
+};
+
+function restaurantStatus(r) {
+  if (r.is_verified) return "Approved";
+  if (r.rejection_reason) return "Rejected";
+  return "Pending";
+}
 
 function AdminDashboard() {
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+
   const [stats, setStats] = useState({
     totalRestaurants: 0,
     totalCustomers: 0,
@@ -10,6 +26,10 @@ function AdminDashboard() {
     pendingRestaurants: 0,
   });
   const [loading, setLoading] = useState(true);
+
+  const [restaurants, setRestaurants] = useState([]);
+  const [loadingRestaurants, setLoadingRestaurants] = useState(true);
+  const [restaurantsError, setRestaurantsError] = useState("");
 
   useEffect(() => {
     authRequest("/api/admin/overview")
@@ -23,7 +43,17 @@ function AdminDashboard() {
       )
       .catch(() => {})
       .finally(() => setLoading(false));
+
+    authRequest("/api/admin/restaurants")
+      .then((data) => setRestaurants(data || []))
+      .catch((err) => setRestaurantsError(err.message))
+      .finally(() => setLoadingRestaurants(false));
   }, []);
+
+  const handleLogout = () => {
+    logout();
+    navigate("/admin/login");
+  };
 
   return (
     <>
@@ -84,6 +114,18 @@ function AdminDashboard() {
         /* Pending badge */
         .pending-badge { background: #fce4ec; color: #c62828; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 20px; margin-left: 8px; }
 
+        /* Logout */
+        .admin-logout-btn { width: 100%; background: none; border: none; color: #b3261e; font-size: 13px; font-weight: 600; cursor: pointer; padding: 0; text-align: left; }
+
+        /* Restaurants table */
+        .restaurants-table { width: 100%; border-collapse: collapse; }
+        .restaurants-table th { text-align: left; padding: 14px 24px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: #717971; border-bottom: 1px solid #e8ebe8; background: #fafaf4; }
+        .restaurants-table td { padding: 14px 24px; font-size: 14px; color: #1a1c19; border-bottom: 1px solid #f4f4ee; }
+        .restaurants-table tr:last-child td { border-bottom: none; }
+        .restaurant-status-pill { font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 9999px; }
+        .table-empty { padding: 40px; text-align: center; color: #717971; }
+        .table-error { padding: 24px; color: #b3261e; }
+
         .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; font-family: 'Material Symbols Outlined'; }
       `}</style>
 
@@ -112,7 +154,9 @@ function AdminDashboard() {
               Orders
             </a>
           </nav>
-          <div className="admin-sidebar-footer">© 2025 Qooti</div>
+          <div className="admin-sidebar-footer">
+            <button className="admin-logout-btn" onClick={handleLogout}>Log Out</button>
+          </div>
         </aside>
 
         {/* Main Content */}
@@ -184,6 +228,50 @@ function AdminDashboard() {
                 <p>Monitor all active subscriptions</p>
               </div>
             </a>
+          </div>
+
+          {/* Restaurants */}
+          <p className="section-title">Restaurants</p>
+          <div className="section-card">
+            {restaurantsError ? (
+              <div className="table-error">{restaurantsError}</div>
+            ) : loadingRestaurants ? (
+              <div className="table-empty">Loading...</div>
+            ) : restaurants.length === 0 ? (
+              <div className="table-empty">No restaurants registered yet.</div>
+            ) : (
+              <table className="restaurants-table">
+                <thead>
+                  <tr>
+                    <th>Restaurant Name</th>
+                    <th>Status</th>
+                    <th>Registered On</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {restaurants.map((r) => {
+                    const status = restaurantStatus(r);
+                    return (
+                      <tr key={r.restaurant_id}>
+                        <td>{r.restaurant_name}</td>
+                        <td>
+                          <span
+                            className="restaurant-status-pill"
+                            style={{
+                              background: RESTAURANT_STATUS_COLORS[status].bg,
+                              color: RESTAURANT_STATUS_COLORS[status].color,
+                            }}
+                          >
+                            {status}
+                          </span>
+                        </td>
+                        <td>{new Date(r.created_at).toLocaleDateString()}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
           </div>
         </main>
       </div>
