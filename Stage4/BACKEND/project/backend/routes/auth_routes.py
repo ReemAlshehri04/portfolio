@@ -164,7 +164,7 @@ def login_user(user: LoginRequest):
 
         cursor.execute(
             """
-            SELECT user_id, full_name, email, password_hash, user_type, is_active
+            SELECT user_id, full_name, email, phone, password_hash, user_type, is_active
             FROM app_user
             WHERE email = %s;
             """,
@@ -207,6 +207,7 @@ def login_user(user: LoginRequest):
                 "user_id": db_user["user_id"],
                 "full_name": db_user["full_name"],
                 "email": db_user["email"],
+                "phone": db_user["phone"],
                 "user_type": db_user["user_type"]
             }
         }

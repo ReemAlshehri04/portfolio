@@ -38,7 +38,11 @@ function Navbar() {
       <div className="nav-right">
         {user ? (
           <>
-            <span className="login">{user.full_name}</span>
+            {user.user_type === "client" ? (
+              <Link to="/profile" className="login">{user.full_name}</Link>
+            ) : (
+              <span className="login">{user.full_name}</span>
+            )}
             <button className="signup-btn" onClick={handleLogout}>Logout</button>
           </>
         ) : (
