@@ -53,6 +53,7 @@ class UserResponse(BaseModel):
     user_id: int
     full_name: str
     email: str
+    phone: str | None = None
     user_type: str
 
 
