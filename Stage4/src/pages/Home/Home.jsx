@@ -2,9 +2,9 @@ import { useEffect } from "react";
 import "./Home.css";
 import Navbar from "../../components/Navbar/Navbar";
 import Hero from "../../components/Hero/Hero";
-import Benefits from "../../components/Benefits/Benefits";
+import HowItWorks from "../../components/HowItWorks/HowItWorks";
 import MealPlans from "../../components/MealPlans/MealPlans";
-import Testimonials from "../../components/Testimonials/Testimonials";
+import Benefits from "../../components/Benefits/Benefits";
 import FAQ from "../../components/FAQ/FAQ";
 import Footer from "../../components/Footer/Footer";
 
@@ -22,9 +22,9 @@ function Home() {
     <>
       <Navbar />
       <Hero />
-      <Benefits />
+      <HowItWorks />
       <MealPlans />
-      <Testimonials />
+      <Benefits />
       <FAQ />
       <Footer />
     </>
