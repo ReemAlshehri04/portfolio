@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar/Navbar";
 import { apiGet } from "../../services/auth";
 
@@ -36,32 +36,48 @@ function buildWeek() {
 
 function WeeklyMealSelection() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const restaurantId = searchParams.get("restaurant");
 
   const days = useMemo(buildWeek, []);
   const [activeDay, setActiveDay] = useState(days[0].key);
   const [meals, setMeals] = useState([]);
-  const [restaurant, setRestaurant] = useState(null);
   const [selections, setSelections] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // A restaurant must be chosen first — send the user to pick one.
+  // Load every approved restaurant's menu and merge into one flat list,
+  // tagging each meal with its restaurant name for display.
   useEffect(() => {
-    if (!restaurantId) navigate("/restaurants");
-  }, [restaurantId, navigate]);
-
-  useEffect(() => {
-    if (!restaurantId) return;
-    apiGet(`/api/restaurants/${restaurantId}`)
-      .then(setRestaurant)
-      .catch(() => {});
-    apiGet(`/api/restaurants/${restaurantId}/meals`)
-      .then((data) => setMeals(data.meals ?? []))
+    apiGet("/api/restaurants")
+      .then(async (restaurants) => {
+        const perRestaurant = await Promise.all(
+          restaurants.map((r) =>
+            apiGet(`/api/restaurants/${r.restaurant_id}/meals`)
+              .then((data) =>
+                (data.meals ?? []).map((m) => ({
+                  ...m,
+                  restaurant_name: r.restaurant_name,
+                }))
+              )
+              .catch(() => [])
+          )
+        );
+        setMeals(perRestaurant.flat());
+      })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [restaurantId]);
+  }, []);
+
+  // Group the flat meal list by restaurant so the menu renders as
+  // one section per restaurant, with its name as the section heading.
+  const mealsByRestaurant = useMemo(() => {
+    const groups = new Map();
+    meals.forEach((meal) => {
+      const key = meal.restaurant_name || "Other";
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(meal);
+    });
+    return Array.from(groups.entries());
+  }, [meals]);
 
   const handleSelect = (meal) => {
     setSelections((prev) => ({ ...prev, [activeDay]: meal }));
@@ -95,8 +111,6 @@ function WeeklyMealSelection() {
     if (!allSelected) return;
     navigate("/order-summary", {
       state: {
-        restaurantId: Number(restaurantId),
-        restaurantName: restaurant?.restaurant_name || "",
         startDate: days[0].iso,
         endDate: days[days.length - 1].iso,
         days: days.map((d) => ({
@@ -105,6 +119,7 @@ function WeeklyMealSelection() {
           meal_id: selections[d.key].meal_id,
           name: selections[d.key].name,
           calories: selections[d.key].calories,
+          restaurant_name: selections[d.key].restaurant_name,
         })),
       },
     });
@@ -119,38 +134,40 @@ function WeeklyMealSelection() {
 
       <style>{`
         .wms-body { background: #fafaf4; color: #1a1c19; font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh; }
-        .wms-main { max-width: 1200px; margin: 0 auto; padding: 40px 32px 64px; display: grid; grid-template-columns: 2fr 1fr; gap: 32px; align-items: start; }
+        .wms-main { max-width: 1200px; margin: 0 auto;padding: 40px 32px 64px; display: grid; grid-template-columns: 2fr 1fr; gap: 32px; align-items: start; }
         .wms-title { font-family: 'Hanken Grotesk', sans-serif; font-size: 32px; font-weight: 700; }
         .wms-subtitle { font-size: 15px; color: #5e5e5b; margin-top: 6px; margin-bottom: 24px; }
         .wms-tabs { display: flex; gap: 10px; margin-bottom: 24px; }
         .wms-tab { flex: 1; text-align: center; padding: 12px 4px; border-radius: 12px; background: #f4f4ee; cursor: pointer; border: 2px solid transparent; }
         .wms-tab.active { background: #325f3f; color: #fff; }
         .wms-tab.filled:not(.active) { border-color: #bcefc5; }
-        .wms-tab-label { font-size: 11px; font-weight: 700; letter-spacing: 0.05em; opacity: 0.8; }
+        .wms-tab-label { font-size: 11px; font-weight:700; letter-spacing: 0.05em; opacity: 0.8; }
         .wms-tab-date { font-size: 18px; font-weight: 700; margin-top: 2px; }
         .wms-section-title { font-size: 15px; font-weight: 600; margin-bottom: 12px; }
         .wms-meal-card { background: #fff; border-radius: 16px; padding: 16px; display: flex; gap: 16px; box-shadow: 0 4px 20px rgba(26,28,25,0.04); margin-bottom: 24px; }
         .wms-meal-img { width: 140px; height: 140px; border-radius: 12px; flex-shrink: 0; background: linear-gradient(135deg, #bcefc5, #325f3f); display: flex; align-items: center; justify-content: center; font-size: 40px; }
-        .wms-meal-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .wms-meal-img img { width: 100%; height: 100%;object-fit: cover; display: block; }
         .wms-pick-img { width: 100%; height: 120px; border-radius: 10px; background: linear-gradient(135deg, #bcefc5, #325f3f); overflow: hidden; margin-bottom: 4px; }
-        .wms-pick-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .wms-pick-img img { width: 100%; height: 100%;object-fit: cover; display: block; }
         .wms-meal-info { flex: 1; display: flex; flex-direction: column; }
         .wms-tags { display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
-        .wms-tag { font-size: 11px; font-weight: 600; background: #eaf5ec; color: #325f3f; padding: 3px 10px; border-radius: 9999px; }
+        .wms-tag { font-size: 11px; font-weight: 600; background: #eaf5ec; color: #325f3f; padding: 3px 10px;border-radius: 9999px; }
         .wms-meal-name { font-family: 'Hanken Grotesk', sans-serif; font-size: 18px; font-weight: 700; }
-        .wms-meal-restaurant { font-size: 12px; color: #717971; margin-top: 2px; }
+        .wms-meal-restaurant { font-size: 13px; font-weight: 700; color: #325f3f; margin-top: 2px; letter-spacing: 0.02em; }
         .wms-meal-stats { display: flex; gap: 16px; margin-top: 10px; font-size: 12px; color: #414941; }
-        .wms-meal-footer { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 12px; }
-        .wms-change-btn { background: #f4f4ee; border: none; border-radius: 9999px; padding: 6px 16px; font-size: 12px; font-weight: 600; color: #325f3f; cursor: pointer; }
+        .wms-meal-footer { display: flex; align-items:center; justify-content: space-between; margin-top: auto; padding-top: 12px; }
+        .wms-change-btn { background: #f4f4ee; border:none; border-radius: 9999px; padding: 6px 16px; font-size: 12px; font-weight: 600; color: #325f3f; cursor: pointer; }
         .wms-empty { background: #fff; border: 2px dashed #c1c9bf; border-radius: 16px; padding: 24px; text-align: center; color: #717971; margin-bottom: 24px; }
-        .wms-pick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+        .wms-restaurant-group { margin-bottom: 32px; }
+        .wms-restaurant-heading { font-family: 'Hanken Grotesk', sans-serif; font-size: 18px; font-weight: 700; color: #1a1c19; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 2px solid #eceee9; }
+        .wms-pick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .wms-pick-card { background: #fff; border-radius: 14px; padding: 14px; box-shadow: 0 4px 20px rgba(26,28,25,0.04); border: 2px solid transparent; display: flex; flex-direction: column; gap: 6px; }
-        .wms-pick-card.chosen { border-color: #325f3f; }
-        .wms-pick-name { font-size: 14px; font-weight: 700; }
+        .wms-pick-card.chosen { border-color: #325f3f;}
+        .wms-pick-name { font-size: 14px; font-weight:700; }
         .wms-pick-stats { font-size: 12px; color: #414941; display: flex; gap: 10px; }
         .wms-pick-btn { align-self: flex-start; margin-top: 4px; background: #325f3f; color: #fff; border: none; border-radius: 9999px; padding: 6px 16px; font-size: 12px; font-weight: 600; cursor: pointer; }
         .wms-pick-btn.chosen { background: #eaf5ec; color: #325f3f; }
-        .wms-error { background: #fdecea; color: #b3261e; border-radius: 12px; padding: 14px 16px; font-size: 13px; margin-bottom: 20px; }
+        .wms-error { background: #fdecea; color: #b3261e; border-radius: 12px; padding: 14px 16px; font-size:13px; margin-bottom: 20px; }
 
         .wms-summary { background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(26,28,25,0.04); position: sticky; top: 24px; }
         .wms-summary-title { font-family: 'Hanken Grotesk', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 16px; }
@@ -169,9 +186,7 @@ function WeeklyMealSelection() {
           <div>
             <h1 className="wms-title">Weekly Selection</h1>
             <p className="wms-subtitle">
-              {restaurant
-                ? `Pick one meal per day from ${restaurant.restaurant_name} for next week (Sunday to Thursday).`
-                : "Pick one meal per day for next week (Sunday to Thursday)."}
+              Pick one meal per day from any of our partner restaurants for next week (Sunday to Thursday).
             </p>
 
             {error && <div className="wms-error">{error}</div>}
@@ -200,13 +215,13 @@ function WeeklyMealSelection() {
                 </div>
                 <div className="wms-meal-info">
                   <div className="wms-tags">
-                    {(activeMeal.tags || []).map((tag) => (
+                    {(activeMeal.tags || []).map((tag)=> (
                       <span key={tag} className="wms-tag">{tag}</span>
                     ))}
                   </div>
                   <div className="wms-meal-name">{activeMeal.name}</div>
                   <div className="wms-meal-restaurant">
-                    {restaurant?.restaurant_name}
+                    {activeMeal.restaurant_name}
                   </div>
                   <div className="wms-meal-stats">
                     <span>{activeMeal.calories} kcal</span>
@@ -236,42 +251,47 @@ function WeeklyMealSelection() {
               <div className="wms-empty">Loading meals…</div>
             ) : meals.length === 0 ? (
               <div className="wms-empty">
-                This restaurant has no available meals right now.
+                No meals are available right now.
               </div>
             ) : (
-              <div className="wms-pick-grid">
-                {meals.map((meal) => {
-                  const chosen = activeMeal?.meal_id === meal.meal_id;
-                  return (
-                    <div
-                      key={meal.meal_id}
-                      className={`wms-pick-card ${chosen ? "chosen" : ""}`}
-                    >
-                      <div className="wms-pick-img">
-                        {meal.image_url ? <img src={meal.image_url} alt={meal.name} /> : null}
-                      </div>
-                      <div className="wms-pick-name">{meal.name}</div>
-                      <div className="wms-pick-stats">
-                        <span>{meal.calories} kcal</span>
-                        <span>{meal.protein_g}g protein</span>
-                      </div>
-                      <div className="wms-tags">
-                        {(meal.tags || []).map((tag) => (
-                          <span key={tag} className="wms-tag">{tag}</span>
-                        ))}
-                      </div>
-                      <button
-                        className={`wms-pick-btn ${chosen ? "chosen" : ""}`}
-                        onClick={() => handleSelect(meal)}
-                      >
-                        {chosen
-                          ? "Selected ✓"
-                          : `Choose for ${activeDayInfo.label}`}
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
+              mealsByRestaurant.map(([restaurantName, restaurantMeals]) => (
+                <div key={restaurantName} className="wms-restaurant-group">
+                  <h3 className="wms-restaurant-heading">{restaurantName}</h3>
+                  <div className="wms-pick-grid">
+                    {restaurantMeals.map((meal) => {
+                      const chosen = activeMeal?.meal_id === meal.meal_id;
+                      return (
+                        <div
+                          key={meal.meal_id}
+                          className={`wms-pick-card ${chosen ? "chosen" : ""}`}
+                        >
+                          <div className="wms-pick-img">
+                            {meal.image_url ? <img src={meal.image_url} alt={meal.name} /> : null}
+                          </div>
+                          <div className="wms-pick-name">{meal.name}</div>
+                          <div className="wms-pick-stats">
+                            <span>{meal.calories} kcal</span>
+                            <span>{meal.protein_g}g protein</span>
+                          </div>
+                          <div className="wms-tags">
+                            {(meal.tags || []).map((tag) => (
+                              <span key={tag} className="wms-tag">{tag}</span>
+                            ))}
+                          </div>
+                          <button
+                            className={`wms-pick-btn ${chosen ? "chosen" : ""}`}
+                            onClick={() => handleSelect(meal)}
+                          >
+                            {chosen
+                              ? "Selected ✓"
+                              : `Choose for ${activeDayInfo.label}`}
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))
             )}
           </div>
 
@@ -284,7 +304,7 @@ function WeeklyMealSelection() {
             </div>
             <div className="wms-summary-row">
               <span>Total Calories</span>
-              <strong>{totalCalories.toLocaleString()} kcal</strong>
+              <strong>{totalCalories.toLocaleString()}kcal</strong>
             </div>
             <div className="wms-summary-row">
               <span>Week Starts</span>

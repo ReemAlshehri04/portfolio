@@ -44,7 +44,7 @@ function OrderSummary() {
         <main style={{ maxWidth: 600, margin: "0 auto", padding: "64px 32px", textAlign: "center" }}>
           <h1 style={{ fontSize: 24, marginBottom: 12 }}>No meal selection found</h1>
           <p style={{ color: "#5e5e5b", marginBottom: 24 }}>
-            Start by choosing a restaurant and picking your meals for the week.
+            Start by choosing your meals for the week.
           </p>
           <Link to="/restaurants" style={{ color: "#325f3f", fontWeight: 600 }}>
             Browse restaurants →
@@ -171,28 +171,28 @@ function OrderSummary() {
         .os-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
         .os-card { background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(26,28,25,0.04); }
         .os-card-title { font-family: 'Hanken Grotesk', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 16px; }
-        .os-plan-row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 12px; }
+        .os-plan-row { display: flex; justify-content:space-between; font-size: 14px; margin-bottom: 12px; }
         .os-plan-row strong { display: block; font-size: 15px; }
         .os-address-label { font-size: 11px; color: #717971; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
         .os-address { font-size: 14px; margin-bottom: 16px; }
         .os-meals-title { font-size: 13px; font-weight: 600; color: #414941; margin-bottom: 10px; }
-        .os-meal-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .os-meal-row { display: flex; justify-content:space-between; align-items: center; margin-bottom: 12px; }
         .os-meal-name { font-size: 14px; font-weight: 600; }
         .os-meal-restaurant { font-size: 12px; color: #717971; }
         .os-meal-price { font-size: 13px; color: #414941; }
         .os-divider { border: none; border-top: 1px solid #eceee9; margin: 16px 0; }
 
         .os-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
-        .os-label { font-size: 13px; font-weight: 600; color: #414941; }
+        .os-label { font-size: 13px; font-weight: 600;color: #414941; }
         .os-input, .os-select { width: 100%; height: 46px; padding: 0 14px; border-radius: 10px; background: #f4f4ee; border: 2px solid transparent; font-size: 14px; box-sizing: border-box; font-family: inherit; }
         .os-input:focus, .os-select:focus { outline: none; border-color: #325f3f; background: #fff; }
 
         .os-discount-row { display: flex; gap: 8px; }
         .os-discount-row .os-input { flex: 1; }
-        .os-apply-btn { background: #1a1c19; color: #fff; border: none; border-radius: 10px; padding: 0 18px; font-size: 13px; font-weight: 600; cursor: pointer; }
-        .os-apply-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .os-apply-btn { background: #1a1c19; color: #fff; border: none; border-radius: 10px; padding: 0 18px;font-size: 13px; font-weight: 600; cursor: pointer; }
+        .os-apply-btn:disabled { opacity: 0.6; cursor:not-allowed; }
         .os-discount-error { font-size: 12px; color: #b3261e; margin-top: 4px; }
-        .os-discount-success { font-size: 12px; color: #188038; margin-top: 4px; }
+        .os-discount-success { font-size: 12px; color:#188038; margin-top: 4px; }
         .os-remove-code { background: none; border: none; color: #b3261e; font-size: 12px; font-weight: 600; cursor: pointer; padding: 0; margin-left: 8px; }
         .os-sum-row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px; color: #414941; }
         .os-sum-row.discount { color: #188038; }
@@ -225,10 +225,6 @@ function OrderSummary() {
                 <div>
                   <span className="os-address-label">Plan</span>
                   <strong>Weekly Lunch (Sun–Thu)</strong>
-                </div>
-                <div style={{ textAlign: "right" }}>
-                  <span className="os-address-label">Restaurant</span>
-                  <strong>{state.restaurantName}</strong>
                 </div>
               </div>
 
@@ -299,7 +295,7 @@ function OrderSummary() {
                 <div className="os-meal-row" key={d.iso}>
                   <div>
                     <div className="os-meal-name">{d.name}</div>
-                    <div className="os-meal-restaurant">{d.full}, {d.iso}</div>
+                    <div className="os-meal-restaurant">{d.restaurant_name} · {d.full}, {d.iso}</div>
                   </div>
                   <span className="os-meal-price">{d.calories} kcal</span>
                 </div>
