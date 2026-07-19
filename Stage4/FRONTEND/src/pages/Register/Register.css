@@ -1,0 +1,209 @@
+.qp-body {
+  background-color: #fafaf4;
+  color: #1a1c19;
+  font-family: "Plus Jakarta Sans", sans-serif;
+}
+.qp-logo {
+  position: absolute;
+  top: 32px;
+  left: 32px;
+  z-index: 2;
+  font-family: "Hanken Grotesk", sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+}
+.qp-main {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-image: url("/register5.jpg");
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  overflow: hidden;
+}
+.qp-main::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 83, 52, 0.804);
+}
+.qp-subtext {
+  font-size: 18px;
+  color: #5e5e5b;
+}
+.qp-card {
+  max-width: 480px;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+  background: #fff;
+  box-shadow: 0 4px 20px rgba(26, 28, 25, 0.04);
+  border-radius: 24px;
+  padding: 40px;
+  border: 1px solid rgba(193, 201, 191, 0.1);
+}
+.qp-card-title {
+  font-family: "Hanken Grotesk", sans-serif;
+  font-size: 30px;
+  font-weight: 600;
+  color: #1a1c19;
+  margin-bottom: 8px;
+}
+.qp-card-sub {
+  font-size: 13px;
+  font-weight: 600;
+  color: #5e5e5b;
+  margin-bottom: 32px;
+}
+.qp-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.qp-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.qp-grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.qp-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #414941;
+  margin-left: 4px;
+}
+.qp-input {
+  width: 100%;
+  height: 48px;
+  padding: 0 16px;
+  border-radius: 12px;
+  background: #f4f4ee;
+  border: 2px solid transparent;
+  font-size: 16px;
+  color: #1a1c19;
+  transition:
+    border-color 0.2s,
+    background 0.2s;
+  box-sizing: border-box;
+  font-family: "Plus Jakarta Sans", sans-serif;
+}
+.qp-input:focus {
+  outline: none;
+  border-color: #325f3f;
+  background: #fff;
+}
+.qp-select {
+  width: 100%;
+  height: 48px;
+  padding: 0 16px;
+  border-radius: 12px;
+  background: #f4f4ee;
+  border: 2px solid transparent;
+  font-size: 16px;
+  color: #1a1c19;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+  appearance: none;
+  cursor: pointer;
+  font-family: "Plus Jakarta Sans", sans-serif;
+}
+.qp-select:focus {
+  outline: none;
+  border-color: #325f3f;
+  background: #fff;
+}
+.qp-submit {
+  width: 100%;
+  background: #325f3f;
+  color: #fff;
+  height: 56px;
+  border-radius: 9999px;
+  border: none;
+  font-family: "Hanken Grotesk", sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 8px 24px rgba(50, 95, 63, 0.2);
+  transition:
+    background 0.2s,
+    transform 0.1s;
+  margin-top: 16px;
+}
+.qp-submit:hover {
+  background: #4a7856;
+}
+.qp-submit:active {
+  transform: scale(0.98);
+}
+.qp-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+.qp-error {
+  font-size: 14px;
+  color: #b3261e;
+  margin-top: -8px;
+}
+.qp-footer-link {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: #5e5e5b;
+  margin-top: 24px;
+}
+.qp-footer-link a {
+  color: #325f3f;
+  font-weight: 700;
+  text-decoration: none;
+}
+.qp-footer-link a:hover {
+  text-decoration: underline;
+}
+.qp-footer {
+  padding: 48px 64px;
+  max-width: 1280px;
+  margin: 0 auto;
+  border-top: 1px solid #c1c9bf;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.qp-footer-links {
+  display: flex;
+  gap: 32px;
+}
+.qp-footer-links a {
+  font-size: 12px;
+  font-weight: 500;
+  color: #5e5e5b;
+  text-decoration: none;
+}
+.qp-footer-links a:hover {
+  color: #325f3f;
+}
+.qp-copyright {
+  font-size: 12px;
+  color: #5e5e5b;
+}
+.material-symbols-outlined {
+  font-variation-settings:
+    "FILL" 0,
+    "wght" 400,
+    "GRAD" 0,
+    "opsz" 24;
+  vertical-align: middle;
+  font-family: "Material Symbols Outlined";
+}

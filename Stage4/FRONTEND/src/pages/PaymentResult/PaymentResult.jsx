@@ -1,3 +1,4 @@
+import "./PaymentResult.css";
 import { Link, useSearchParams } from "react-router-dom";
 import Navbar from "../../components/Navbar/Navbar";
 
@@ -47,15 +48,7 @@ function PaymentResult() {
         href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap"
         rel="stylesheet"
       />
-      <style>{`
-        .pres-body { background: #fafaf4; color: #1a1c19; font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh; }
-        .pres-main { max-width: 560px; margin: 0 auto; padding: 80px 32px; text-align: center; }
-        .pres-icon { font-size: 56px; margin-bottom: 16px; }
-        .pres-title { font-family: 'Hanken Grotesk', sans-serif; font-size: 28px; font-weight: 700; margin-bottom: 10px; }
-        .pres-desc { font-size: 15px; color: #5e5e5b; margin-bottom: 32px; }
-        .pres-cta { display: inline-block; background: #325f3f; color: #fff; text-decoration: none; padding: 14px 32px; border-radius: 9999px; font-size: 15px; font-weight: 600; }
-        .pres-secondary { display: block; margin-top: 16px; color: #325f3f; font-size: 14px; font-weight: 600; text-decoration: none; }
-      `}</style>
+     
 
       <div className="pres-body">
         <Navbar />

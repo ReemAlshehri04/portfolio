@@ -1,0 +1,57 @@
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        .pay-body { background: #fafaf4; min-height: 100vh; display: flex; flex-direction: column; font-family: 'Plus Jakarta Sans', sans-serif; color: #1a1c19; }
+        .pay-nav { background: #fafaf4; box-shadow: 0 4px 20px rgba(26,28,25,0.04); position: sticky; top: 0; z-index: 50; }
+        .pay-nav-inner { display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 1280px; margin: 0 auto; padding: 16px 64px; }
+        .pay-logo { font-family: 'Hanken Grotesk', sans-serif; font-size: 24px; font-weight: 700; color: #325f3f; text-decoration: none; }
+        .pay-nav-links { display: flex; gap: 32px; }
+        .pay-nav-links a { font-size: 16px; color: #5e5e5b; text-decoration: none; transition: color 0.2s; }
+        .pay-nav-links a:hover { color: #325f3f; }
+        .pay-main { flex-grow: 1; max-width: 1280px; margin: 0 auto; width: 100%; padding: 32px 64px; }
+        .pay-header { margin-bottom: 32px; }
+        .pay-header h1 { font-family: 'Hanken Grotesk', sans-serif; font-size: 48px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 8px; }
+        .pay-header p { font-size: 18px; color: #5e5e5b; display: flex; align-items: center; gap: 8px; }
+        .pay-grid { display: grid; grid-template-columns: 5fr 7fr; gap: 32px; }
+        .pay-card { background: #fff; border-radius: 24px; padding: 32px; box-shadow: 0 4px 20px rgba(26,28,25,0.04); border: 1px solid rgba(193,201,191,0.3); }
+        .pay-card h2 { font-family: 'Hanken Grotesk', sans-serif; font-size: 24px; font-weight: 600; margin-bottom: 24px; }
+        .pay-plan-row { display: flex; justify-content: space-between; margin-bottom: 24px; }
+        .pay-plan-label { font-size: 12px; font-weight: 500; color: #5e5e5b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+        .pay-plan-value { font-size: 16px; font-weight: 600; color: #1a1c19; }
+        .pay-meals-title { font-size: 14px; font-weight: 600; color: #1a1c19; margin-bottom: 16px; border-top: 1px solid rgba(87,86,77,0.2); padding-top: 16px; }
+        .pay-meal-item { display: flex; gap: 16px; margin-bottom: 16px; align-items: center; }
+        .pay-meal-img { width: 64px; height: 64px; border-radius: 12px; overflow: hidden; flex-shrink: 0; }
+        .pay-meal-img img { width: 100%; height: 100%; object-fit: cover; }
+        .pay-meal-name { font-size: 16px; font-weight: 600; color: #1a1c19; }
+        .pay-meal-rest { font-size: 12px; color: #5e5e5b; }
+        .pay-meal-price { font-size: 16px; font-weight: 700; color: #325f3f; margin-left: auto; }
+        .pay-breakdown { background: #f4f4ee; border-radius: 12px; padding: 16px; }
+        .pay-breakdown-row { display: flex; justify-content: space-between; font-size: 16px; color: #5e5e5b; margin-bottom: 8px; }
+        .pay-breakdown-row.free { color: #325f3f; font-weight: 500; }
+        .pay-breakdown-total { display: flex; justify-content: space-between; font-family: 'Hanken Grotesk', sans-serif; font-size: 24px; font-weight: 600; color: #1a1c19; border-top: 1px solid rgba(87,86,77,0.2); padding-top: 8px; margin-top: 8px; }
+        .pay-form { display: flex; flex-direction: column; gap: 16px; }
+        .pay-form-group { display: flex; flex-direction: column; gap: 4px; }
+        .pay-label { font-size: 14px; font-weight: 600; color: #414941; }
+        .pay-input { width: 100%; background: #f4f4ee; border: none; border-radius: 12px; padding: 16px; font-size: 16px; font-family: 'Plus Jakarta Sans', sans-serif; color: #1a1c19; outline: none; transition: box-shadow 0.2s; }
+        .pay-input:focus { box-shadow: 0 0 0 2px #325f3f; }
+        .pay-input-wrap { position: relative; }
+        .pay-input-icon { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: #5e5e5b; font-family: 'Material Symbols Outlined'; }
+        .pay-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .pay-checkbox-row { display: flex; align-items: center; gap: 12px; cursor: pointer; padding-top: 8px; }
+        .pay-checkbox { width: 20px; height: 20px; accent-color: #325f3f; cursor: pointer; }
+        .pay-checkbox-label { font-size: 16px; color: #1a1c19; }
+        .pay-submit { width: 100%; background: #325f3f; color: #fff; border: none; border-radius: 9999px; padding: 16px; font-family: 'Hanken Grotesk', sans-serif; font-size: 24px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 8px 24px rgba(50,95,63,0.3); transition: background 0.2s, transform 0.1s; margin-top: 8px; }
+        .pay-submit:hover { background: #4a7856; }
+        .pay-submit:active { transform: scale(0.98); }
+        .pay-submit:disabled { background: #c1c9bf; cursor: not-allowed; }
+        .pay-trust { display: flex; align-items: center; justify-content: center; gap: 8px; color: #5e5e5b; font-size: 14px; font-weight: 600; padding-top: 16px; }
+        .pay-error { background: #fce4ec; color: #c62828; padding: 12px 16px; border-radius: 12px; font-size: 14px; font-weight: 500; }
+        .pay-footer { background: #eeeee9; border-top: 1px solid rgba(87,86,77,0.1); margin-top: 80px; }
+        .pay-footer-inner { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; max-width: 1280px; margin: 0 auto; padding: 32px 64px; }
+        .pay-footer-logo { font-family: 'Hanken Grotesk', sans-serif; font-size: 24px; font-weight: 700; color: #325f3f; margin-bottom: 16px; }
+        .pay-footer-desc { font-size: 14px; color: #5e5e5b; }
+        .pay-footer-title { font-size: 14px; font-weight: 700; margin-bottom: 16px; }
+        .pay-footer-links { display: flex; flex-direction: column; gap: 8px; }
+        .pay-footer-links a { font-size: 14px; color: #5e5e5b; text-decoration: underline; }
+        .pay-footer-bottom { text-align: center; padding: 16px; font-size: 14px; color: #5e5e5b; border-top: 1px solid rgba(87,86,77,0.1); max-width: 1280px; margin: 0 auto; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; font-family: 'Material Symbols Outlined'; }
+      

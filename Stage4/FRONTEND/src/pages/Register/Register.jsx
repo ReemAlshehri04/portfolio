@@ -1,10 +1,10 @@
-import { useState } from "react";
+import "./Register.css";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { registerUser } from "../../services/auth";
-
 function Register() {
   const navigate = useNavigate();
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     fullName: "",
@@ -19,57 +19,76 @@ function Register() {
     password: "",
     confirmPassword: "",
   });
+  useEffect(() => {
+    if (Object.keys(errors).length > 0) {
+      const firstErrorEl = document.querySelector(".qp-error");
+      if (firstErrorEl) {
+        firstErrorEl.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }
+  }, [errors]);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
 
+    if (errors[name]) {
+      setErrors((prev) => {
+        const updated = { ...prev };
+        delete updated[name];
+        return updated;
+      });
+    }
+  };
   const validate = () => {
+    const errors = {};
     if (formData.fullName.trim().length < 2) {
-      return "Please enter your full name.";
+      errors.fullName = "Please enter your full name.";
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      return "Please enter a valid email address.";
+      errors.email = "Please enter a valid email address.";
     }
     if (!/^0[0-9]{8,14}$/.test(formData.phone.replace(/\s/g, ""))) {
-      return "Phone number must contain digits only and start with 0.";
+      errors.phone = "Phone number must contain digits only and start with 0.";
     }
-    if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{8,}$/.test(formData.password)) {
-      return "Password must be at least 8 characters and include an uppercase letter, a lowercase letter, a number, and a special character.";
+    if (
+      !/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{8,}$/.test(
+        formData.password,
+      )
+    ) {
+      errors.password =
+        "Must be 8+ characters with uppercase, lowercase, a number, and a special character.";
     }
     if (formData.password !== formData.confirmPassword) {
-      return "Passwords do not match.";
+      errors.confirmPassword = "Passwords do not match.";
     }
     const age = Number(formData.age);
     if (!age || age < 13 || age > 100) {
-      return "Age must be between 13 and 100.";
+      errors.age = "Age must be between 13 and 100.";
     }
     const height = Number(formData.height);
     if (!height || height < 100 || height > 250) {
-      return "Height must be between 100 and 250 cm.";
+      errors.height = "Height must be between 100 and 250 cm.";
     }
     const weight = Number(formData.weight);
     if (!weight || weight < 30 || weight > 300) {
-      return "Weight must be between 30 and 300 kg.";
+      errors.weight = "Weight must be between 30 and 300 kg.";
     }
     if (!formData.address.trim()) {
-      return "Please enter a delivery address.";
+      errors.address = "Please enter a delivery address.";
     }
-    return "";
+    return errors;
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
+    setErrors({});
 
-    const validationError = validate();
-    if (validationError) {
-      setError(validationError);
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
       return;
     }
-
     setIsSubmitting(true);
-
     try {
       await registerUser({
         user_type: "client",
@@ -86,7 +105,7 @@ function Register() {
       });
       navigate("/login");
     } catch (err) {
-      setError(err.message);
+      setErrors({ general: err.message });
     } finally {
       setIsSubmitting(false);
     }
@@ -94,7 +113,6 @@ function Register() {
 
   return (
     <>
-      {/* Google Fonts */}
       <link
         href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap"
         rel="stylesheet"
@@ -103,100 +121,14 @@ function Register() {
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
         rel="stylesheet"
       />
-
-      <style>{`
-        .qp-body { background-color: #fafaf4; color: #1a1c19; font-family: 'Plus Jakarta Sans', sans-serif; }
-        .qp-nav { position: fixed; top: 0; left: 0; width: 100%; z-index: 50; background: #fafaf4; box-shadow: 0 1px 4px rgba(0,0,0,0.06); height: 80px; display: flex; align-items: center; }
-        .qp-nav-inner { display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 1280px; margin: 0 auto; padding: 0 64px; }
-        .qp-logo { font-family: 'Hanken Grotesk', sans-serif; font-size: 24px; font-weight: 700; color: #325f3f; }
-        .qp-nav-links { display: flex; gap: 32px; }
-        .qp-nav-links a { font-size: 14px; font-weight: 600; color: #414941; text-decoration: none; transition: color 0.2s; }
-        .qp-nav-links a:hover { color: #325f3f; }
-        .qp-btn-outline { background: none; border: none; color: #325f3f; font-size: 14px; font-weight: 600; cursor: pointer; }
-        .qp-btn-primary { background: #325f3f; color: #fff; border: none; padding: 10px 24px; border-radius: 9999px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
-        .qp-btn-primary:hover { background: #4a7856; }
-        .qp-main { padding-top: 80px; min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #fafaf4; position: relative; overflow: hidden; }
-        .qp-bg-blob1 { position: absolute; top: -96px; right: -96px; width: 384px; height: 384px; background: rgba(188,239,197,0.2); border-radius: 50%; filter: blur(100px); }
-        .qp-bg-blob2 { position: absolute; bottom: -96px; left: -96px; width: 384px; height: 384px; background: rgba(230,226,215,0.3); border-radius: 50%; filter: blur(100px); }
-        .qp-grid { width: 100%; max-width: 1280px; margin: 0 auto; padding: 48px 64px; display: grid; grid-template-columns: 7fr 5fr; gap: 24px; align-items: center; }
-        .qp-hero { display: flex; flex-direction: column; gap: 32px; }
-        .qp-headline { font-family: 'Hanken Grotesk', sans-serif; font-size: 48px; font-weight: 700; line-height: 1.15; color: #1a1c19; }
-        .qp-headline span { color: #325f3f; font-style: italic; }
-        .qp-subtext { font-size: 18px; color: #5e5e5b; }
-        .qp-img-wrap { position: relative; width: 100%; aspect-ratio: 16/10; overflow: hidden; border-radius: 32px; box-shadow: 0 4px 20px rgba(26,28,25,0.04); background: #fff; }
-        .qp-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
-        .qp-badges { position: absolute; bottom: 24px; left: 24px; display: flex; gap: 8px; }
-        .qp-badge { background: rgba(250,250,244,0.9); backdrop-filter: blur(8px); padding: 6px 16px; border-radius: 9999px; font-size: 12px; font-weight: 500; color: #325f3f; border: 1px solid #c1c9bf; }
-        .qp-card { background: #fff; box-shadow: 0 4px 20px rgba(26,28,25,0.04); border-radius: 24px; padding: 40px; border: 1px solid rgba(193,201,191,0.1); }
-        .qp-card-title { font-family: 'Hanken Grotesk', sans-serif; font-size: 32px; font-weight: 600; color: #1a1c19; margin-bottom: 8px; }
-        .qp-card-sub { font-size: 14px; font-weight: 600; color: #5e5e5b; margin-bottom: 32px; }
-        .qp-form { display: flex; flex-direction: column; gap: 20px; }
-        .qp-field { display: flex; flex-direction: column; gap: 6px; }
-        .qp-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-        .qp-label { font-size: 14px; font-weight: 600; color: #414941; margin-left: 4px; }
-        .qp-input { width: 100%; height: 48px; padding: 0 16px; border-radius: 12px; background: #f4f4ee; border: 2px solid transparent; font-size: 16px; color: #1a1c19; transition: border-color 0.2s, background 0.2s; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
-        .qp-input:focus { outline: none; border-color: #325f3f; background: #fff; }
-        .qp-select { width: 100%; height: 48px; padding: 0 16px; border-radius: 12px; background: #f4f4ee; border: 2px solid transparent; font-size: 16px; color: #1a1c19; transition: border-color 0.2s; box-sizing: border-box; appearance: none; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; }
-        .qp-select:focus { outline: none; border-color: #325f3f; background: #fff; }
-        .qp-submit { width: 100%; background: #325f3f; color: #fff; height: 56px; border-radius: 9999px; border: none; font-family: 'Hanken Grotesk', sans-serif; font-size: 20px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 8px 24px rgba(50,95,63,0.2); transition: background 0.2s, transform 0.1s; margin-top: 16px; }
-        .qp-submit:hover { background: #4a7856; }
-        .qp-submit:active { transform: scale(0.98); }
-        .qp-submit:disabled { opacity: 0.7; cursor: not-allowed; }
-        .qp-error { font-size: 14px; color: #b3261e; margin-top: -8px; }
-        .qp-footer-link { text-align: center; font-size: 14px; font-weight: 600; color: #5e5e5b; margin-top: 24px; }
-        .qp-footer-link a { color: #325f3f; font-weight: 700; text-decoration: none; }
-        .qp-footer-link a:hover { text-decoration: underline; }
-        .qp-footer { padding: 48px 64px; max-width: 1280px; margin: 0 auto; border-top: 1px solid #c1c9bf; display: flex; justify-content: space-between; align-items: center; gap: 24px; flex-wrap: wrap; }
-        .qp-footer-links { display: flex; gap: 32px; }
-        .qp-footer-links a { font-size: 12px; font-weight: 500; color: #5e5e5b; text-decoration: none; }
-        .qp-footer-links a:hover { color: #325f3f; }
-        .qp-copyright { font-size: 12px; color: #5e5e5b; }
-        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; font-family: 'Material Symbols Outlined'; }
-      `}</style>
-
       <div className="qp-body">
-        {/* Navbar */}
-        <nav className="qp-nav">
-          <div className="qp-nav-inner">
-            <div className="qp-logo">Qooti</div>
-            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-              <Link to="/login"><button className="qp-btn-outline">Log In</button></Link>
-              <Link to="/register"><button className="qp-btn-primary">Sign Up</button></Link>
-            </div>
-          </div>
-        </nav>
-
-        {/* Main */}
         <main className="qp-main">
-          <div className="qp-bg-blob1" />
-          <div className="qp-bg-blob2" />
-
           <div className="qp-grid">
-            {/* Left: Hero */}
             <div className="qp-hero">
-              <div>
-                <h1 className="qp-headline">
-                  Start your journey to{" "}
-                  <span>effortless</span> health.
-                </h1>
-                <p className="qp-subtext" style={{ marginTop: "16px" }}>
-                  Join Qooti today and get personalized nutrition plans
-                  crafted by science and perfected by chefs.
-                </p>
-              </div>
-              <div className="qp-img-wrap">
-                <img
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuCt_MLSFd3vuoUki1vsXyXDMs6QGd46jlko9rGGyEJfGWnC1AG9O_GY7Wc34AVuJuHuY5kTXfFxkCqSgqlS4XGFLAA9QEcAAUMaQJcuKnpZ4qwvpN57vSh8eZ2Y88cZ6tRHIbZ8MPCmYz5fLpymJVOvokIKf4bdK-vrrpNoBby2i419GctXJI70mQU7wydv0_bTCoeQ6iArb4ShaOzmsRyt9YDzuFyzUDN_lswvmN1jrGsUshaS1x1VMG72-Zejvdy9_8juccGbzzU"
-                  alt="Healthy meal bowl"
-                />
-                <div className="qp-badges">
-                  <span className="qp-badge">High Protein</span>
-                  <span className="qp-badge">Organic Ingredients</span>
-                </div>
-              </div>
+              <div></div>
+              <div className="qp-img-wrap"></div>
             </div>
 
-            {/* Right: Form */}
             <div className="qp-card">
               <h2 className="qp-card-title">Create Account</h2>
               <p className="qp-card-sub">
@@ -213,8 +145,10 @@ function Register() {
                     placeholder="John Doe"
                     value={formData.fullName}
                     onChange={handleChange}
-                    required
                   />
+                  {errors.fullName && (
+                    <p className="qp-error">{errors.fullName}</p>
+                  )}
                 </div>
 
                 <div className="qp-field">
@@ -226,8 +160,8 @@ function Register() {
                     placeholder="name@example.com"
                     value={formData.email}
                     onChange={handleChange}
-                    required
                   />
+                  {errors.email && <p className="qp-error">{errors.email}</p>}
                 </div>
 
                 <div className="qp-field">
@@ -239,8 +173,8 @@ function Register() {
                     placeholder="05xxxxxxxx"
                     value={formData.phone}
                     onChange={handleChange}
-                    required
                   />
+                  {errors.phone && <p className="qp-error">{errors.phone}</p>}
                 </div>
 
                 <div className="qp-field">
@@ -252,8 +186,10 @@ function Register() {
                     placeholder="••••••••"
                     value={formData.password}
                     onChange={handleChange}
-                    required
                   />
+                  {errors.password && (
+                    <p className="qp-error">{errors.password}</p>
+                  )}
                 </div>
 
                 <div className="qp-field">
@@ -265,8 +201,10 @@ function Register() {
                     placeholder="••••••••"
                     value={formData.confirmPassword}
                     onChange={handleChange}
-                    required
                   />
+                  {errors.confirmPassword && (
+                    <p className="qp-error">{errors.confirmPassword}</p>
+                  )}
                 </div>
 
                 <div className="qp-grid2">
@@ -274,13 +212,15 @@ function Register() {
                     <label className="qp-label">Age</label>
                     <input
                       className="qp-input"
-                      type="text" inputMode="numeric" pattern="[0-9]*"
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
                       name="age"
                       placeholder="25"
                       value={formData.age}
                       onChange={handleChange}
-                      required
                     />
+                    {errors.age && <p className="qp-error">{errors.age}</p>}
                   </div>
                   <div className="qp-field">
                     <label className="qp-label">Gender</label>
@@ -289,12 +229,14 @@ function Register() {
                       name="gender"
                       value={formData.gender}
                       onChange={handleChange}
-                      required
                     >
                       <option value="">Select</option>
                       <option value="male">Male</option>
                       <option value="female">Female</option>
                     </select>
+                    {errors.gender && (
+                      <p className="qp-error">{errors.gender}</p>
+                    )}
                   </div>
                 </div>
 
@@ -303,25 +245,33 @@ function Register() {
                     <label className="qp-label">Height (cm)</label>
                     <input
                       className="qp-input"
-                      type="text" inputMode="numeric" pattern="[0-9]*"
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
                       name="height"
                       placeholder="170"
                       value={formData.height}
                       onChange={handleChange}
-                      required
                     />
+                    {errors.height && (
+                      <p className="qp-error">{errors.height}</p>
+                    )}
                   </div>
                   <div className="qp-field">
                     <label className="qp-label">Weight (kg)</label>
                     <input
                       className="qp-input"
-                      type="text" inputMode="numeric" pattern="[0-9]*"
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
                       name="weight"
                       placeholder="65"
                       value={formData.weight}
                       onChange={handleChange}
-                      required
                     />
+                    {errors.weight && (
+                      <p className="qp-error">{errors.weight}</p>
+                    )}
                   </div>
                 </div>
 
@@ -332,7 +282,6 @@ function Register() {
                     name="healthGoal"
                     value={formData.healthGoal}
                     onChange={handleChange}
-                    required
                   >
                     <option value="">Choose your primary focus</option>
                     <option value="lose_weight">Lose Weight</option>
@@ -340,6 +289,9 @@ function Register() {
                     <option value="bulking">Bulking</option>
                     <option value="gaining_weight">Gaining Weight</option>
                   </select>
+                  {errors.healthGoal && (
+                    <p className="qp-error">{errors.healthGoal}</p>
+                  )}
                 </div>
 
                 <div className="qp-field">
@@ -351,41 +303,34 @@ function Register() {
                     placeholder="123 Main St, Riyadh"
                     value={formData.address}
                     onChange={handleChange}
-                    required
                   />
+                  {errors.address && (
+                    <p className="qp-error">{errors.address}</p>
+                  )}
                 </div>
 
-                {error && <p className="qp-error">{error}</p>}
+                {errors.general && <p className="qp-error">{errors.general}</p>}
 
-                <button className="qp-submit" type="submit" disabled={isSubmitting}>
+                <button
+                  className="qp-submit"
+                  type="submit"
+                  disabled={isSubmitting}
+                >
                   {isSubmitting ? "Creating Account..." : "Create Account"}
-                  <span className="material-symbols-outlined">arrow_forward</span>
+                  <span className="material-symbols-outlined">
+                    arrow_forward
+                  </span>
                 </button>
               </form>
 
               <p className="qp-footer-link">
-                Already have an account?{" "}
-                <Link to="/login">Log In</Link>
+                Already have an account? <Link to="/login">Log In</Link>
               </p>
             </div>
           </div>
         </main>
-
-        {/* Footer */}
-        <footer>
-          <div className="qp-footer">
-            <div className="qp-logo">Qooti</div>
-            <div className="qp-footer-links">
-              <a href="#">Privacy Policy</a>
-              <a href="#">Terms of Service</a>
-              <a href="#">Contact Us</a>
-            </div>
-            <p className="qp-copyright">© 2026 Qooti. Effortless Health.</p>
-          </div>
-        </footer>
       </div>
     </>
   );
 }
-
 export default Register;
