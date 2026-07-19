@@ -23,12 +23,14 @@ def get_restaurant_meals(restaurant_id: int):
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        # Check if the restaurant exists
+        # Check if the restaurant exists and is approved (pending/rejected
+        # restaurants are hidden publicly, matching the restaurant detail endpoint)
         cursor.execute(
             """
             SELECT restaurant_id
             FROM restaurant
-            WHERE restaurant_id = %s;
+            WHERE restaurant_id = %s
+            AND is_verified = TRUE;
             """,
             (restaurant_id,)
         )
