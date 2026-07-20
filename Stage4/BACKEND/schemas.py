@@ -1,5 +1,5 @@
 from typing import List, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr, Field
 from enum import Enum
 from datetime import date, time
 from decimal import Decimal
@@ -25,13 +25,13 @@ class HealthGoal(str, Enum):
 class RegisterRequest(BaseModel):
     user_type: UserType
     full_name: str
-    email: str
-    password: str
+    email: EmailStr
+    password: str = Field(min_length=8)
     phone: str
-    age: Optional[int] = None
+    age: Optional[int] = Field(None, gt=0, le=120)
     gender: Optional[Gender] = None
-    height_cm: Optional[float] = None
-    weight_kg: Optional[float] = None
+    height_cm: Optional[float] = Field(None, gt=0)
+    weight_kg: Optional[float] = Field(None, gt=0)
     health_goal: Optional[HealthGoal] = None
     address: Optional[str] = None
     # Restaurant profile (required when user_type == "restaurant")
