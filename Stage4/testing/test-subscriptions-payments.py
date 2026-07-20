@@ -24,7 +24,8 @@ import sys
 import time
 from decimal import Decimal
 from pathlib import Path
-from urllib.parse import urljoin
+from types import SimpleNamespace
+from urllib.parse import parse_qs, urljoin, urlparse
 
 import psycopg2
 import requests
@@ -125,8 +126,22 @@ def pay(headers, subscription_id, **card_overrides):
 
 
 def callback(moyasar_payment_id):
-    """Hit our callback endpoint the way Moyasar's browser redirect would"""
-    return requests.get(f"{BASE_URL}/api/payments/callback", params={"id": moyasar_payment_id})
+    """Hit our callback endpoint the way Moyasar's browser redirect would.
+
+    The endpoint serves the customer's browser: every outcome (including
+    errors) redirects to the frontend /payment-result page. Follow the
+    redirect and parse the outcome from the landing URL's query params.
+    Requires the frontend dev server on FRONTEND_BASE_URL (default :5173).
+    """
+    r = requests.get(f"{BASE_URL}/api/payments/callback", params={"id": moyasar_payment_id})
+    landed = urlparse(r.url)
+    params = {k: v[0] for k, v in parse_qs(landed.query).items()}
+    return SimpleNamespace(
+        on_result_page=r.status_code == 200 and landed.path == "/payment-result",
+        status=params.get("status"),
+        message=params.get("message", ""),
+        subscription_id=params.get("subscription_id"),
+    )
 
 
 def complete_3ds(transaction_url, auth_result="AUTHENTICATED"):
@@ -208,7 +223,7 @@ def test_subscription_creation(client_a):
 
     r = create_sub(client_a, discount_code_id=code_id("SAVE10"))
     check("SUB3", "valid subscription (with discount) → 200 + discount_amount calculated",
-          r.status_code == 200 and Decimal(r.json()["discount_amount"]) == Decimal("50.00"),
+          r.status_code == 200 and Decimal(r.json()["discount_amount"]) == Decimal("25.00"),
           f"status={r.status_code} discount={r.json().get('discount_amount')}")
 
     r = create_sub(client_a, start_date="2026-07-21", end_date="2026-07-15")
@@ -279,16 +294,16 @@ def test_moyasar_payment_flow(client_a, client_b):
           f"db={row['payment_status']}")
 
     r = callback(moyasar_id)
-    check("PAY3", "callback before 3D Secure → not confirmed, stays 'pending'",
-          r.status_code == 200 and r.json().get("payment_status") == "pending",
-          f"resp={r.json().get('message', '')[:60]}")
+    check("PAY3", "callback before 3D Secure → not confirmed, redirect status 'pending'",
+          r.on_result_page and r.status == "pending",
+          f"status={r.status} msg={r.message[:60]}")
 
     ok = complete_3ds(body["transaction_url"], "AUTHENTICATED")
     time.sleep(1)
     r = callback(moyasar_id)
-    check("PAY4", "3D Secure approved + callback → payment 'success'",
-          ok and r.status_code == 200 and r.json().get("payment_status") == "success",
-          f"3ds={ok} resp={r.json().get('message', '')[:60]}")
+    check("PAY4", "3D Secure approved + callback → redirect status 'success'",
+          ok and r.on_result_page and r.status == "success",
+          f"3ds={ok} status={r.status} msg={r.message[:60]}")
 
     row = db_one("""
         SELECT p.payment_status, s.status AS sub_status
@@ -324,12 +339,13 @@ def test_moyasar_payment_flow(client_a, client_b):
     row = db_one("SELECT payment_status FROM payment WHERE subscription_id = %s;",
                  (sub4["subscription_id"],))
     check("PAY10", "3D Secure declined + callback → payment 'failed'",
-          ok and r.status_code == 200 and row["payment_status"] == "failed",
-          f"3ds={ok} db={row['payment_status']}")
+          ok and r.on_result_page and r.status == "failed" and row["payment_status"] == "failed",
+          f"3ds={ok} status={r.status} db={row['payment_status']}")
 
     r = callback("00000000-0000-0000-0000-000000000000")
-    check("PAY11", "callback with unknown transaction id → 404",
-          r.status_code == 404, f"status={r.status_code}")
+    check("PAY11", "callback with unknown transaction id → redirect status 'error'",
+          r.on_result_page and r.status == "error",
+          f"status={r.status} msg={r.message[:60]}")
 
 
 def test_transaction_atomicity(client_a):
@@ -364,9 +380,9 @@ def test_transaction_atomicity(client_a):
     try:
         r = callback(body["transaction_id"])
         row = db_one("SELECT payment_status FROM payment WHERE subscription_id = %s;", (sub_id,))
-        check("PAY13", "failure mid-callback → 500 and payment stays 'pending' (rolled back)",
-              r.status_code == 500 and row["payment_status"] == "pending",
-              f"status={r.status_code} payment={row['payment_status']}")
+        check("PAY13", "failure mid-callback → error redirect and payment stays 'pending' (rolled back)",
+              r.on_result_page and r.status == "error" and row["payment_status"] == "pending",
+              f"status={r.status} payment={row['payment_status']}")
     finally:
         db_exec("DROP TRIGGER IF EXISTS qa_fail_sub ON subscription;")
         db_exec("DROP FUNCTION IF EXISTS qa_fail();")

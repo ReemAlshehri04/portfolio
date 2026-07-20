@@ -1,8 +1,5 @@
 # Test Cases — Registration and Login Flows
 
-**Project:** Healthy Meals Subscription Platform
-**Sprint:** Sprint 1 — Setup and Authentication
-**Owner:** Badryah Almalki (QA Lead + Database)
 **Endpoints Covered:** `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/logout`
 
 ---
@@ -61,13 +58,4 @@ For each test case below, run the request (e.g. via Postman) and fill in the **A
 | O1 | Valid logout with active token | Valid JWT in request | 200 success response | | | |
 | O2 | Logout without token | No Authorization header | 401 error | | | |
 | O3 | Logout with invalid/expired token | Malformed or expired JWT | 401 error | | | |
-| O4 | Token invalidated after logout (if applicable) | Use same token again after logout | Confirm expected behavior — depends on whether logout blacklists tokens or is client-side only | | | Needs confirmation from Moudhi |
-
----
-
-## Open Questions for Backend
-
-- **R10:** Should health fields sent for a `restaurant` registration be ignored or rejected? 
-- **L8:** What error message/status should a deactivated account receive on login?
-- **L9:** Is email login case-insensitive?
-- **O4:** Does logout invalidate the JWT server-side, or is it purely client-side (token just discarded)?
+| O4 | Token invalidated after logout (if applicable) | Use same token again after logout | Confirm expected behavior — depends on whether logout blacklists tokens or is client-side only | | | |
