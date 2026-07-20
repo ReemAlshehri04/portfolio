@@ -1,6 +1,9 @@
 # Test Results — Qooti Healthy Meals Subscription Platform
 
-**Automated test script (subscriptions, payments):** [`test-subscriptions-payments.py`](test-subscriptions-payments.py)
+**Automated test scripts:**
+- [`test-subscriptions-payments.py`](test-subscriptions-payments.py) — subscriptions + Moyasar payments (28 cases)
+- [`test-restaurant-flow.py`](test-restaurant-flow.py) — onboarding/approval, meal CRUD, meal selections, orders view (39 cases)
+- [`test-admin-flow.py`](test-admin-flow.py) — admin dashboard, listing filters, approval validation (25 cases)
 
 Results are organized by feature area: **Admin — Restaurant Approval**, **Public —
 Restaurant Browsing**, **Subscriptions**, **Payments**. Each section lists its own
@@ -12,14 +15,22 @@ execution date, environment notes, and test-case table.
 
 | Feature | Cases | Passed | Failed | Notes |
 |---|---|---|---|---|
-| Admin — Restaurant Approval | 18 | 18 | 0 | 1 minor contract observation (see AR7) |
-| Public — Restaurant Browsing | 11 | 11 | 0 | |
+| Admin — Restaurant Approval (manual, 2026-07-07) | 18 | 18 | 0 | 1 minor contract observation (see AR7); since automated in `test-admin-flow.py` |
+| Public — Restaurant Browsing (manual, 2026-07-08) | 11 | 11 | 0 | Since automated in `test-restaurant-flow.py` |
 | Subscriptions | 14 | 14 | 0 | 1 bug found & fixed (expired-discount 500→400) |
 | Payments (Moyasar sandbox) | 14 | 14 | 0 | Full 3D Secure flow scripted end-to-end |
-| **Total** | **57** | **57** | **0** | **100% pass rate** |
+| Restaurant flow (automated, 2026-07-19) | 39 | 39 | 0 | Onboarding, meal CRUD, selections, orders — see `test-restaurant-flow.py` |
+| Admin flow (automated, 2026-07-19) | 25 | 25 | 0 | Dashboard, filters, approval validation — see `test-admin-flow.py` |
+| **Total** | **121** | **121** | **0** | **100% pass rate** |
 
-Meal CRUD (`POST/PUT/DELETE /api/meals`, `GET /api/restaurants/:id/meals`) is **not yet
-implemented** and has no results here.
+> **2026-07-19 update:** Meal CRUD (`POST/PUT/DELETE /api/meals`,
+> `GET /api/restaurants/:id/meals`), meal selections, and the restaurant orders view
+> are now implemented and covered by `test-restaurant-flow.py` (39 automated cases).
+> The admin panel (overview, customers, orders, filters) is covered by
+> `test-admin-flow.py` (25 automated cases). The subscriptions/payments suite was
+> re-run the same day — the sections below note where its recorded values were
+> superseded by code changes (plan price halved to SAR 250; callback now redirects
+> to the frontend).
 
 ---
 
@@ -123,12 +134,13 @@ approved during the admin run above); rejected = ids 2, 4; pending = id 5.
 
 `POST /api/subscriptions`. Client-only.
 
-**Execution Date:** 2026-07-09
+**Execution Date:** 2026-07-09  (re-run 2026-07-19, all passing)
 **Test script:** [`test-subscriptions-payments.py`](test-subscriptions-payments.py) —
 automated (requests + psycopg2), run with the backend venv against uvicorn on
 `127.0.0.1:8000`.
-**Pricing model:** fixed `original_price = 500.00` per subscription (meal-level pricing
-is not in the schema yet).
+**Pricing model:** fixed `original_price = 250.00` per subscription (meal-level pricing
+is not in the schema yet). The tables below show the current SAR 250 values — the
+original 2026-07-09 run used SAR 500, halved to 250 in commit `18898a6`.
 
 **Bug found & fixed:** the expired-discount check compared a timezone-aware `NOW()`
 against a naive `expires_at` in Python, returning 500 instead of 400 (SUB14). Fixed by
@@ -140,7 +152,7 @@ moving the expiry comparison into SQL.
 |---|---|---|---|---|
 | SUB1 | Valid subscription (no discount) | 200, `subscription_id` returned | 200 | ✓ |
 | SUB2 | Payment row auto-created | DB `payment.payment_status = 'pending'` | 'pending' | ✓ |
-| SUB3 | Valid subscription (10% discount) | 200, `discount_amount = 50.00` | 200, 50.00 | ✓ |
+| SUB3 | Valid subscription (10% discount) | 200, `discount_amount = 25.00` | 200, 25.00 | ✓ |
 | SUB4 | `end_date < start_date` | 400 | 400 | ✓ |
 | SUB5 | Non-existent discount code | 400 | 400 | ✓ |
 | SUB6 | Missing `start_date` | 422 validation error | 422 | ✓ |
@@ -151,9 +163,9 @@ moving the expiry comparison into SQL.
 
 | # | Test Case | Expected | Actual | Pass/Fail |
 |---|---|---|---|---|
-| SUB9 | 10% discount | 500.00 → 450.00 | 450.00 | ✓ |
-| SUB10 | 25% discount | 500.00 → 375.00 | 375.00 | ✓ |
-| SUB11 | No discount | 500.00 → 500.00 | 500.00 | ✓ |
+| SUB9 | 10% discount | 250.00 → 225.00 | 225.00 | ✓ |
+| SUB10 | 25% discount | 250.00 → 187.50 | 187.50 | ✓ |
+| SUB11 | No discount | 250.00 → 250.00 | 250.00 | ✓ |
 | SUB12 | Discount > 100% | rejected | DB `chk_discount_percentage` blocks insert | ✓ |
 | SUB13 | Inactive discount code | 400 | 400 | ✓ |
 | SUB14 | Expired discount code | 400 | 400 (after bugfix, was 500) | ✓ |
@@ -169,12 +181,15 @@ Because Moyasar enforces 3D Secure on card payments, the flow is two-step:
 1. `POST /api/payments` (with card details) → creates the payment at Moyasar, stores
    the Moyasar payment id as `transaction_id`, returns `payment_status='pending'` +
    `transaction_url` (the 3D Secure page).
-2. Customer completes 3D Secure → Moyasar redirects to `GET /api/payments/callback`,
-   which re-fetches the payment status **server-to-server** (query params are never
-   trusted) and marks payment `success` + subscription `confirmed` in one DB
-   transaction.
+2. Customer completes 3D Secure → Moyasar redirects the customer's **browser** to
+   `GET /api/payments/callback`, which re-fetches the payment status
+   **server-to-server** (query params are never trusted), marks payment `success` +
+   subscription `confirmed` in one DB transaction, and then redirects the browser to
+   the frontend `/payment-result?status=…` page. Every callback outcome — success,
+   failed, pending, error — is a redirect, not a JSON response; the test suite
+   follows the redirect and asserts on the landing URL's query params.
 
-**Execution Date:** 2026-07-09
+**Execution Date:** 2026-07-09 (re-run 2026-07-19 against the redirect contract, all passing)
 **Test technique:** the suite walks Moyasar's test-mode 3D Secure pages
 programmatically (prepare → authenticate → ACS emulator → set_auth_result →
 acs_return), choosing `AUTHENTICATED` or `UNAUTHENTICATED`, so the full paid/failed
@@ -188,15 +203,15 @@ and internet access — the suite hits the real Moyasar sandbox.
 |---|---|---|---|---|
 | PAY1 | Initiate payment (valid card) | 200, 'pending' + transaction_url | 200, pending, URL returned | ✓ |
 | PAY2 | Moyasar id persisted | DB `transaction_id` = Moyasar payment id, still 'pending' | matches | ✓ |
-| PAY3 | Callback before 3DS | not confirmed, stays 'pending' | "Payment not completed yet (gateway status: initiated)" | ✓ |
-| PAY4 | 3DS approved + callback | payment 'success' | "Payment successful. Subscription confirmed." | ✓ |
+| PAY3 | Callback before 3DS | not confirmed, stays 'pending' | redirect to `/payment-result?status=pending` | ✓ |
+| PAY4 | 3DS approved + callback | payment 'success' | redirect to `/payment-result?status=success` | ✓ |
 | PAY5 | DB after confirmation | payment 'success', subscription 'confirmed' | success / confirmed | ✓ |
 | PAY6 | Non-existent subscription | 404 | 404 | ✓ |
 | PAY7 | Not owner | 403 | 403 | ✓ |
 | PAY8 | Re-pay after success | 400 | 400 "Payment is already success" | ✓ |
 | PAY9 | Invalid card number | 400 (Moyasar validation) | 400 | ✓ |
-| PAY10 | 3DS declined + callback | payment 'failed' | failed (gateway status verified server-side) | ✓ |
-| PAY11 | Callback with unknown transaction id | 404 | 404 | ✓ |
+| PAY10 | 3DS declined + callback | payment 'failed' | redirect `status=failed`; DB 'failed' (gateway status verified server-side) | ✓ |
+| PAY11 | Callback with unknown transaction id | error redirect | redirect `status=error` "Payment not found at gateway" | ✓ |
 
 ### Transaction Atomicity
 
@@ -206,7 +221,7 @@ then the DB is checked for half-committed rows.
 | # | Test Case | Expected | Actual | Pass/Fail |
 |---|---|---|---|---|
 | PAY12 | Failure during payment INSERT (subscription creation) | 500; subscription rolled back | count unchanged | ✓ |
-| PAY13 | Failure mid-callback (subscription UPDATE fails after payment UPDATE) | 500; payment stays 'pending' despite Moyasar reporting 'paid' | pending (rolled back) | ✓ |
+| PAY13 | Failure mid-callback (subscription UPDATE fails after payment UPDATE) | error redirect; payment stays 'pending' despite Moyasar reporting 'paid' | redirect `status=error`; pending (rolled back) | ✓ |
 | PAY14 | No orphaned rows | subscription ↔ payment always paired | 0 orphans | ✓ |
 
 ### Resolved API-Contract Questions
@@ -227,7 +242,11 @@ then the DB is checked for half-committed rows.
 
 ## Outstanding Work
 
-- Meal CRUD (`POST/PUT/DELETE /api/meals`, `GET /api/restaurants/:id/meals`) — not
-  implemented yet.
+- Registration/login has manual test cases only
+  ([`test-cases-registration-login.md`](test-cases-registration-login.md)) — worth
+  automating in a customer-flow suite.
+- Subscription history (`GET /api/subscriptions/:user_id`), schedule
+  (`GET /api/subscriptions/:id/schedule`), and profile (`GET`/`PUT /api/users/me`)
+  have no automated coverage.
 - Consider tightening AR7 to return 422 on an unknown `status` filter value (optional,
   low priority).
