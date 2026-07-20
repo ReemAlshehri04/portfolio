@@ -1,12 +1,5 @@
 -- ============================================================
--- Healthy Meals Subscription Platform — PostgreSQL Schema
--- Stage 3: Technical Documentation
--- Lead Database: Badryah Almalki
--- ============================================================
-
--- ============================================================
 -- ENUM TYPES
--- Must be created before the tables that use them
 -- ============================================================
 CREATE TYPE user_type_enum AS ENUM (
     'client',
@@ -51,8 +44,7 @@ CREATE TYPE payment_status_enum AS ENUM (
 );
 
 -- ============================================================
--- TABLE 1: discount_code
--- No foreign key dependencies — created first
+-- discount_code
 -- ============================================================
 CREATE TABLE discount_code (
     discount_code_id    SERIAL          NOT NULL,
@@ -69,21 +61,7 @@ CREATE TABLE discount_code (
 );
 
 -- ============================================================
--- TABLE 2: app_user
--- Renamed from 'user' — reserved word in PostgreSQL
--- No foreign key dependencies — created second
--- Health profile and address columns are NULL for
--- restaurant and admin user types (enforced by backend)
--- ⚠️  NOTE FOR (BACKEND) — TEAM DECISION:
--- Admin registers through the SAME public registration page
--- as client/restaurant (user_type = 'admin'), not seeded
--- manually. This is a known security tradeoff for the MVP —
--- anyone could currently select 'admin' at signup. If time
--- allows, consider one lightweight safeguard (e.g. a fixed
--- admin invite code required in the payload when
--- user_type = 'admin', or restricting it to the first admin
--- account only). Flagging this so it's a conscious choice,
--- not an oversight, for the project write-up.
+-- app_user
 -- ============================================================
 CREATE TABLE app_user (
     user_id         SERIAL                  NOT NULL,
@@ -103,31 +81,21 @@ CREATE TABLE app_user (
     health_goal     health_goal_enum        DEFAULT NULL,
 
     -- Address (client only — NULL for restaurant and admin)
-    -- Single fixed address per user (updated per team decision:
-    -- one address only, no home/work distinction)
     address         VARCHAR(255)            DEFAULT NULL,
 
     CONSTRAINT pk_app_user PRIMARY KEY (user_id),
     CONSTRAINT uq_app_user_email UNIQUE (email),
-    -- Security safeguard for team decision to allow admin
-    -- registration via the public register page: only emails
-    -- on the team-controlled domain can be user_type = 'admin'.
-    -- Only qooti_admin.com domain allowed for admin accounts.
+
+    -- Only qooti-admin.com domain allowed for admin accounts.
     CONSTRAINT chk_admin_email_domain
         CHECK (
             user_type <> 'admin'
-            OR LOWER(email) LIKE '%@qooti_admin.com'
+            OR LOWER(email) LIKE '%@qooti-admin.com'
         )
 );
 
 -- ============================================================
--- TABLE 3: restaurant
--- Depends on: app_user
--- ⚠️  NOTE FOR (BACKEND):
--- When is_verified = TRUE, rejection_reason should be NULL.
--- When is_verified = FALSE after admin review,
--- rejection_reason should contain the reason.
--- This logic must be enforced at the backend/API level.
+-- restaurant
 -- ============================================================
 CREATE TABLE restaurant (
     restaurant_id       SERIAL          NOT NULL,
@@ -149,15 +117,8 @@ CREATE TABLE restaurant (
 );
 
 -- ============================================================
--- TABLE 4: meal
+-- meal
 -- Depends on: restaurant
--- Soft delete pattern: use is_available = FALSE instead of
--- deleting meals that are referenced in order_item history
--- ⚠️  NOTE FOR (BACKEND):
--- tags is a TEXT[] array. PostgreSQL does not enforce allowed
--- values natively — validate that submitted tags contain only
--- allowed values at the API level.
--- To filter by tag: SELECT * FROM meal WHERE 'Vegan' = ANY(tags);
 -- ============================================================
 CREATE TABLE meal (
     meal_id         SERIAL          NOT NULL,
@@ -183,20 +144,8 @@ CREATE TABLE meal (
 );
 
 -- ============================================================
--- TABLE 5: subscription
+-- subscription
 -- Depends on: app_user, discount_code
--- end_date is always start_date + 6 days — backend calculates,
--- database stores for simpler queries
--- ⚠️  NOTE FOR (BACKEND):
--- Only users with user_type = 'client' should be allowed to
--- create a subscription. Restaurant and admin users must be
--- rejected at the API level before any INSERT is attempted.
--- Each order_item's day_date must fall within the subscription's
--- start_date and end_date range. Validate this in the backend
--- before inserting order_item rows.
--- Delivery address is no longer chosen per subscription — the
--- client's single fixed address (app_user.address) is used
--- automatically at delivery time.
 -- ============================================================
 CREATE TABLE subscription (
     subscription_id     SERIAL                      NOT NULL,
@@ -228,15 +177,8 @@ CREATE TABLE subscription (
 );
 
 -- ============================================================
--- TABLE 6: order_item
+-- order_item
 -- Depends on: subscription, meal
--- ⚠️  NOTE FOR (BACKEND):
--- Once an order_item row is inserted, NO UPDATE or DELETE
--- should be allowed through the API — meal selection is
--- locked on confirmation.
--- When a subscription is cancelled, backend must update ALL
--- 5 related order_item rows to status = 'cancelled' in the
--- SAME TRANSACTION as the subscription cancellation.
 -- ============================================================
 CREATE TABLE order_item (
     order_item_id   SERIAL                      NOT NULL,
@@ -262,18 +204,8 @@ CREATE TABLE order_item (
 );
 
 -- ============================================================
--- TABLE 7: payment
+-- payment
 -- Depends on: subscription
--- One payment row per subscription (enforced by UNIQUE).
--- ⚠️  NOTE FOR (BACKEND):
--- Create the payment row with payment_status = 'pending'
--- immediately after the subscription is inserted.
--- Update to 'success' or 'failed' based on the Payment
--- Gateway API response.
--- Only show the subscription as confirmed to the client
--- once payment_status = 'success'.
--- amount must match subscription.final_price — validate
--- at the API level before inserting.
 -- ============================================================
 CREATE TABLE payment (
     payment_id          SERIAL                  NOT NULL,
@@ -294,15 +226,7 @@ CREATE TABLE payment (
 );
 
 -- ============================================================
--- TABLE 8: review
--- Depends on: order_item, app_user
--- One review per order_item (enforced by UNIQUE).
--- ⚠️  NOTE FOR (BACKEND):
--- Verify that the user_id on the review matches the user_id
--- on the subscription that owns the order_item — clients can
--- only review their own meals.
--- Validate that the subscription status = 'confirmed' before
--- allowing a review to be submitted.
+-- review
 -- ============================================================
 CREATE TABLE review (
     review_id       SERIAL      NOT NULL,

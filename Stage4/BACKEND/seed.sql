@@ -1,20 +1,12 @@
 -- ============================================================
--- Qooti — Mock Seed Data
--- Sprint 1, Task 5: 2 restaurants, 5 meals each, 1 admin user
--- Run AFTER schema0.1.sql has been executed successfully
--- ============================================================
-
--- ============================================================
 -- 1 ADMIN USER (the only admin — provisioned here, never self-registered)
--- Email must match the admin domain constraint (chk_admin_email_domain).
--- DEV login:  admin@qooti_admin.com  /  Admin@Qooti123
--- (Argon2 hash below. CHANGE THIS PASSWORD before any production use.)
+-- DEV login:  admin@qooti-admin.com  /  Admin@Qooti123
 -- ============================================================
 INSERT INTO app_user (user_type, full_name, email, password_hash, phone)
 VALUES (
     'admin',
     'Qooti Admin',
-    'admin@qooti_admin.com',
+    'admin@qooti-admin.com',
     '$argon2id$v=19$m=65536,t=3,p=4$6n2Pca51TmktxVjLGcMYww$avJScbuB4S7VSCV5bGpYGK2SxN39xborSutvYJ3ileo',
     '+966501234567'
 );
@@ -22,7 +14,6 @@ VALUES (
 -- ============================================================
 -- 2 RESTAURANT OWNER ACCOUNTS (app_user)
 -- DEV login (both): Restaurant123!
--- (Argon2 hash below. CHANGE THIS PASSWORD before any production use.)
 -- ============================================================
 INSERT INTO app_user (user_type, full_name, email, password_hash, phone)
 VALUES
@@ -32,7 +23,6 @@ VALUES
 -- ============================================================
 -- 2 RESTAURANTS (linked to the two accounts above)
 -- Using subqueries to fetch the correct user_id by email
--- Both marked is_verified = TRUE so they show up in listings
 -- ============================================================
 INSERT INTO restaurant (user_id, restaurant_name, description, is_verified, logo_url)
 VALUES
@@ -132,10 +122,3 @@ VALUES
         440, 32.00, 40.00, 15.00, ARRAY['DairyFree'],
         'https://images.unsplash.com/photo-1559847844-5315695dadae?w=800&h=600&fit=crop'
     );
-
--- ============================================================
--- VERIFICATION QUERIES (optional — run after inserting to confirm)
--- ============================================================
--- SELECT user_id, user_type, full_name, email FROM app_user;
--- SELECT restaurant_id, restaurant_name, is_verified FROM restaurant;
--- SELECT meal_id, restaurant_id, name, calories FROM meal ORDER BY restaurant_id;
