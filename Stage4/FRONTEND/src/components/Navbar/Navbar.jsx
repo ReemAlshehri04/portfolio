@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import "./Navbar.css";
 
-function Navbar() {
+function Navbar({ transparent = false }) {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
 
@@ -12,28 +12,28 @@ function Navbar() {
   };
 
   return (
-    <nav className="navbar">
+    <nav className={`navbar ${transparent ? "navbar-transparent" : ""}`}>
       <div className="logo">
-        <Link to="/" style={{ color: 'DarkGreen', textDecoration: 'none' }}>
+        <Link to="/" className="logo-link">
           🍽️ Qooti
         </Link>
       </div>
 
       <ul className="nav-links">
-  <li><Link to="/">Home</Link></li>
-  {user?.user_type !== "restaurant" && (
-    <>
-      <li><Link to="/restaurants">Restaurants</Link></li>
-      <li><Link to="/restaurants">Meal Plans</Link></li>
-    </>
-  )}
-  {user?.user_type === "restaurant" && (
-    <>
-      <li><Link to="/restaurant/meals">My Meals</Link></li>
-      <li><Link to="/restaurant/orders">Orders</Link></li>
-    </>
-  )}
-</ul>
+        <li><Link to="/">Home</Link></li>
+        {user?.user_type !== "restaurant" && (
+          <>
+            <li><Link to="/restaurants">Restaurants</Link></li>
+            <li><Link to="/restaurants">Meal Plans</Link></li>
+          </>
+        )}
+        {user?.user_type === "restaurant" && (
+          <>
+            <li><Link to="/restaurant/meals">My Meals</Link></li>
+            <li><Link to="/restaurant/orders">Orders</Link></li>
+          </>
+        )}
+      </ul>
 
       <div className="nav-right">
         {user ? (
@@ -44,7 +44,7 @@ function Navbar() {
               <span className="login">{user.full_name}</span>
             )}
             <button className="signup-btn" onClick={handleLogout}>Logout</button>
-          </>
+           </>
         ) : (
           <>
             <Link to="/login" className="login">Login</Link>

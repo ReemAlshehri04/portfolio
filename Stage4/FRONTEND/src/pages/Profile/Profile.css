@@ -1,0 +1,135 @@
+.profile-body {
+  background: #fafaf4;
+  min-height: 100vh;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  color: #1a1c19;
+}
+.profile-main {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 40px 32px 64px;
+}
+.profile-title {
+  font-family: "Hanken Grotesk", sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 24px;
+}
+.profile-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(26, 28, 25, 0.04);
+  margin-bottom: 24px;
+}
+.profile-card-title {
+  font-family: "Hanken Grotesk", sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+.profile-field {
+  margin-bottom: 16px;
+}
+.profile-field-label {
+  font-size: 11px;
+  color: #717971;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+  display: block;
+}
+.profile-field-value {
+  font-size: 16px;
+  font-weight: 600;
+}
+.profile-input {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #dfe3de;
+  font-size: 14px;
+  font-family: inherit;
+}
+.profile-input:focus {
+  outline: none;
+  border-color: #325f3f;
+}
+.profile-save-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 10px 22px;
+  background: #325f3f;
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+}
+.profile-save-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.profile-message {
+  font-size: 13px;
+  color: #188038;
+  margin-top: 10px;
+}
+.profile-error {
+  font-size: 13px;
+  color: #b3261e;
+  margin-top: 10px;
+}
+.cd-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.cd-status-badge {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 14px;
+  border-radius: 9999px;
+  text-transform: capitalize;
+}
+.cd-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.cd-field-label {
+  font-size: 11px;
+  color: #717971;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+.cd-field-value {
+  font-size: 15px;
+  font-weight: 600;
+}
+.cd-schedule-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.cd-schedule-table th {
+  text-align: left;
+  padding: 10px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #717971;
+  border-bottom: 1px solid #eceee9;
+}
+.cd-schedule-table td {
+  padding: 10px 12px;
+  font-size: 14px;
+  border-bottom: 1px solid #f4f4ee;
+}
+.cd-empty {
+  background: #fff;
+  border: 2px dashed #c1c9bf;
+  border-radius: 16px;
+  padding: 40px;
+  text-align: center;
+  color: #717971;
+}
