@@ -1,17 +1,21 @@
-import psycopg2
-from psycopg2.extras import RealDictCursor
-from dotenv import load_dotenv
 import os
+
+import psycopg2
+from dotenv import load_dotenv
+from psycopg2.extras import RealDictCursor
 
 load_dotenv()
 
+
 def get_db_connection():
-    conn = psycopg2.connect(
-        host="localhost",
-        database="healthy_meals_db",
-        user="postgres",
-        password= os.getenv("password"),
-        port="5432",
-        cursor_factory=RealDictCursor
+    database_url = os.getenv("DATABASE_URL")
+
+    if not database_url:
+        raise RuntimeError(
+            "DATABASE_URL environment variable is not configured."
+        )
+
+    return psycopg2.connect(
+        database_url,
+        cursor_factory=RealDictCursor,
     )
-    return conn

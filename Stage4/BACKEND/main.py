@@ -1,6 +1,8 @@
+import os
+
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from database import get_db_connection
 from routes.auth_routes import router as auth_router
 from routes.meal_routes import router as meal_router
 from routes.subscription_routes import router as subscription_router
@@ -10,11 +12,24 @@ from routes.payment_routes import router as payment_router
 from routes.discount_routes import router as discount_router
 from routes.user_routes import router as user_router
 
+load_dotenv()
+
 app = FastAPI()
+
+frontend_url = os.getenv("FRONTEND_URL")
+
+allowed_origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+
+if frontend_url:
+    allowed_origins.append(frontend_url.rstrip("/"))
+
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -36,3 +51,7 @@ def home():
         "message": "Qooti Backend API is running.",
         "version": "1.0.0"
     }
+
+@app.get("/health")
+def health():
+    return {"status": "healthy"}
