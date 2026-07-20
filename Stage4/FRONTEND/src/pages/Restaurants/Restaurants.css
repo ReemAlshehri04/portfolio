@@ -1,10 +1,10 @@
-.qp-body {
+.rst-body {
   background-color: #fafaf4;
   color: #1a1c19;
   font-family: "Plus Jakarta Sans", sans-serif;
   min-height: 100vh;
 }
-.qp-nav {
+.rst-nav {
   position: fixed;
   top: 0;
   left: 0;
@@ -16,7 +16,7 @@
   display: flex;
   align-items: center;
 }
-.qp-nav-inner {
+.rst-nav-inner {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -25,33 +25,33 @@
   margin: 0 auto;
   padding: 0 64px;
 }
-.qp-logo {
+.rst-logo {
   font-family: "Hanken Grotesk", sans-serif;
   font-size: 24px;
   font-weight: 700;
   color: #325f3f;
   text-decoration: none;
 }
-.qp-nav-links {
+.rst-nav-links {
   display: flex;
   gap: 32px;
 }
-.qp-nav-links a {
+.rst-nav-links a {
   font-size: 14px;
   font-weight: 600;
   color: #414941;
   text-decoration: none;
   transition: color 0.2s;
 }
-.qp-nav-links a:hover {
+.rst-nav-links a:hover {
   color: #325f3f;
 }
-.qp-nav-links a.active {
+.rst-nav-links a.active {
   color: #325f3f;
   border-bottom: 2px solid #325f3f;
   padding-bottom: 2px;
 }
-.qp-btn-outline {
+.rst-btn-outline {
   background: none;
   border: none;
   color: #325f3f;
@@ -59,7 +59,7 @@
   font-weight: 600;
   cursor: pointer;
 }
-.qp-btn-primary {
+.rst-btn-primary {
   background: #325f3f;
   color: #fff;
   border: none;
@@ -69,19 +69,19 @@
   font-weight: 600;
   cursor: pointer;
 }
-.qp-main {
+.rst-main {
   padding-top: 80px;
   min-height: 100vh;
   background: #fafaf4;
 }
 
-.qp-hero {
+.rst-hero {
   max-width: 1280px;
   margin: 0 auto;
   padding: 96px 64px 64px;
   text-align: center;
 }
-.qp-hero-label {
+.rst-hero-label {
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.2em;
@@ -90,7 +90,7 @@
   display: block;
   margin-bottom: 16px;
 }
-.qp-hero-title {
+.rst-hero-title {
   font-family: "Hanken Grotesk", sans-serif;
   font-size: 44px;
   font-weight: 700;
@@ -99,7 +99,7 @@
   color: #1a1c19;
   margin-bottom: 24px;
 }
-.qp-hero-text {
+.rst-hero-text {
   font-size: 18px;
   line-height: 1.6;
   color: #5e5e5b;
@@ -107,39 +107,39 @@
   margin: 0 auto;
 }
 
-.qp-showcase-section {
+.rst-showcase-section {
   padding: 72px 0;
 }
-.qp-showcase-section.alt {
+.rst-showcase-section.alt {
   background: #f4f4ee;
 }
-.qp-showcase-inner {
+.rst-showcase-inner {
   max-width: 1280px;
   margin: 0 auto;
   padding: 0 64px;
 }
-.qp-showcase-row {
+.rst-showcase-row {
   display: flex;
   gap: 56px;
   align-items: flex-start;
   margin-bottom: 56px;
   flex-wrap: wrap;
 }
-.qp-showcase-row.reverse {
+.rst-showcase-row.reverse {
   flex-direction: row-reverse;
 }
-.qp-showcase-info {
+.rst-showcase-info {
   flex: 1 1 400px;
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
-.qp-showcase-header {
+.rst-showcase-header {
   display: flex;
   align-items: center;
   gap: 16px;
 }
-.qp-showcase-icon {
+.rst-showcase-icon {
   width: 60px;
   height: 60px;
   border-radius: 9999px;
@@ -150,23 +150,23 @@
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
   flex-shrink: 0;
 }
-.qp-showcase-title {
+.rst-showcase-title {
   font-family: "Hanken Grotesk", sans-serif;
   font-size: 28px;
   font-weight: 600;
   color: #1a1c19;
 }
-.qp-showcase-desc {
+.rst-showcase-desc {
   font-size: 16px;
   line-height: 1.7;
   color: #5e5e5b;
 }
-.qp-tag-row {
+.rst-tag-row {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
-.qp-tag-pill {
+.rst-tag-pill {
   background: #e1dfdb;
   color: #5e5e5b;
   padding: 4px 16px;
@@ -174,7 +174,7 @@
   font-size: 12px;
   font-weight: 500;
 }
-.qp-showcase-cta {
+.rst-showcase-cta {
   align-self: flex-start;
   background: #325f3f;
   color: #fff;
@@ -189,24 +189,24 @@
   gap: 8px;
   transition: opacity 0.2s;
 }
-.qp-showcase-cta:hover {
+.rst-showcase-cta:hover {
   opacity: 0.9;
 }
-.qp-showcase-image-wrap {
+.rst-showcase-image-wrap {
   flex: 1 1 400px;
   height: 380px;
   border-radius: 24px;
   overflow: hidden;
   box-shadow: 0 4px 20px rgba(26, 28, 25, 0.04);
 }
-.qp-showcase-image {
+.rst-showcase-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
   transition: transform 0.6s ease;
 }
-.qp-showcase-image-placeholder {
+.rst-showcase-image-placeholder {
   width: 100%;
   height: 100%;
   background: linear-gradient(135deg, #e8f5e9, #f4f4ee);
@@ -214,16 +214,16 @@
   align-items: center;
   justify-content: center;
 }
-.qp-showcase-image-wrap:hover .qp-showcase-image {
+.rst-showcase-image-wrap:hover .rst-showcase-image {
   transform: scale(1.04);
 }
 
-.qp-dish-grid {
+.rst-dish-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 24px;
 }
-.qp-dish-card {
+.rst-dish-card {
   background: #fff;
   border-radius: 24px;
   overflow: hidden;
@@ -232,21 +232,21 @@
     transform 0.3s ease,
     box-shadow 0.3s ease;
 }
-.qp-dish-card:hover {
+.rst-dish-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 30px rgba(26, 28, 25, 0.08);
 }
-.qp-dish-img-wrap {
+.rst-dish-img-wrap {
   height: 180px;
   overflow: hidden;
 }
-.qp-dish-img {
+.rst-dish-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: transform 0.5s ease;
 }
-.qp-dish-img-placeholder {
+.rst-dish-img-placeholder {
   width: 100%;
   height: 100%;
   background: linear-gradient(135deg, #e8f5e9, #f4f4ee);
@@ -254,34 +254,34 @@
   align-items: center;
   justify-content: center;
 }
-.qp-dish-card:hover .qp-dish-img {
+.rst-dish-card:hover .rst-dish-img {
   transform: scale(1.08);
 }
-.qp-dish-body {
+.rst-dish-body {
   padding: 20px;
 }
-.qp-dish-title {
+.rst-dish-title {
   font-family: "Hanken Grotesk", sans-serif;
   font-size: 18px;
   font-weight: 600;
   color: #1a1c19;
   margin-bottom: 8px;
 }
-.qp-dish-stats {
+.rst-dish-stats {
   display: flex;
   gap: 16px;
   margin-bottom: 10px;
 }
-.qp-dish-stat {
+.rst-dish-stat {
   font-size: 12px;
   color: #5e5e5b;
 }
-.qp-dish-stat b {
+.rst-dish-stat b {
   display: block;
   color: #325f3f;
   font-size: 14px;
 }
-.qp-dish-desc {
+.rst-dish-desc {
   font-size: 13px;
   color: #5e5e5b;
   line-height: 1.5;
@@ -291,12 +291,12 @@
   -webkit-box-orient: vertical;
 }
 
-.qp-banner-section {
+.rst-banner-section {
   max-width: 1280px;
   margin: 0 auto;
   padding: 80px 64px;
 }
-.qp-banner {
+.rst-banner {
   background: #325f3f;
   color: #fff;
   border-radius: 24px;
@@ -304,20 +304,20 @@
   position: relative;
   overflow: hidden;
 }
-.qp-banner-title {
+.rst-banner-title {
   font-family: "Hanken Grotesk", sans-serif;
   font-size: 28px;
   font-weight: 600;
   margin-bottom: 20px;
 }
-.qp-banner-text {
+.rst-banner-text {
   font-size: 16px;
   line-height: 1.7;
   opacity: 0.9;
   max-width: 640px;
   margin-bottom: 28px;
 }
-.qp-banner-btn {
+.rst-banner-btn {
   background: #fff;
   color: #325f3f;
   border: none;
@@ -327,7 +327,7 @@
   font-weight: 600;
   cursor: pointer;
 }
-.qp-banner-icon {
+.rst-banner-icon {
   position: absolute;
   right: -40px;
   bottom: -40px;
@@ -335,7 +335,7 @@
   opacity: 0.12;
 }
 
-.qp-loading {
+.rst-loading {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -343,7 +343,7 @@
   font-size: 18px;
   color: #5e5e5b;
 }
-.qp-empty {
+.rst-empty {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -351,17 +351,17 @@
   height: 60vh;
   gap: 16px;
 }
-.qp-empty-title {
+.rst-empty-title {
   font-family: "Hanken Grotesk", sans-serif;
   font-size: 24px;
   font-weight: 700;
   color: #1a1c19;
 }
-.qp-empty-sub {
+.rst-empty-sub {
   font-size: 16px;
   color: #5e5e5b;
 }
-.qp-footer {
+.rst-footer {
   border-top: 1px solid #c1c9bf;
   padding: 32px 64px;
   max-width: 1280px;
@@ -372,16 +372,16 @@
   flex-wrap: wrap;
   gap: 16px;
 }
-.qp-footer-links {
+.rst-footer-links {
   display: flex;
   gap: 24px;
 }
-.qp-footer-links a {
+.rst-footer-links a {
   font-size: 12px;
   color: #5e5e5b;
   text-decoration: none;
 }
-.qp-copyright {
+.rst-copyright {
   font-size: 12px;
   color: #5e5e5b;
 }

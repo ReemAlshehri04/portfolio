@@ -1,10 +1,9 @@
+import "./WeeklyMealSelection.css";
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import Navbar from "../../components/Navbar/Navbar";
-import { apiGet } from "../../services/auth";
+import { apiGet, authRequest, getCurrentUser } from "../../services/auth";
 
-// Flat weekly plan price — pricing lives on the subscription, not on meals
-// (backend ORIGINAL_PRICE). Meals carry nutrition info only.
 const PLAN_PRICE = 250.0;
 
 const toIso = (d) =>
@@ -12,7 +11,6 @@ const toIso = (d) =>
     d.getDate()
   ).padStart(2, "0")}`;
 
-// Subscription week = next Sunday through Thursday.
 function buildWeek() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -33,19 +31,35 @@ function buildWeek() {
     };
   });
 }
-
 function WeeklyMealSelection() {
   const navigate = useNavigate();
-
   const days = useMemo(buildWeek, []);
   const [activeDay, setActiveDay] = useState(days[0].key);
   const [meals, setMeals] = useState([]);
   const [selections, setSelections] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [checkingSubscription, setCheckingSubscription] = useState(true);
+  const [activeSubscription, setActiveSubscription] = useState(null);
+  useEffect(() => {
+    const user = getCurrentUser();
+    if (!user) {
+      setCheckingSubscription(false);
+      return;
+    }
 
-  // Load every approved restaurant's menu and merge into one flat list,
-  // tagging each meal with its restaurant name for display.
+    authRequest(`/api/subscriptions/${user.user_id}`)
+      .then((data) => {
+        const today = toIso(new Date());
+        const active = (data.subscriptions || []).find(
+          (s) => s.status === "confirmed" && s.end_date >= today
+        );
+        setActiveSubscription(active || null);
+      })
+      .catch(() => {})
+      .finally(() => setCheckingSubscription(false));
+  }, []);
+
   useEffect(() => {
     apiGet("/api/restaurants")
       .then(async (restaurants) => {
@@ -67,8 +81,6 @@ function WeeklyMealSelection() {
       .finally(() => setLoading(false));
   }, []);
 
-  // Group the flat meal list by restaurant so the menu renders as
-  // one section per restaurant, with its name as the section heading.
   const mealsByRestaurant = useMemo(() => {
     const groups = new Map();
     meals.forEach((meal) => {
@@ -81,7 +93,7 @@ function WeeklyMealSelection() {
 
   const handleSelect = (meal) => {
     setSelections((prev) => ({ ...prev, [activeDay]: meal }));
-    // Convenience: jump to the next unfilled day.
+
     const idx = days.findIndex((d) => d.key === activeDay);
     const next = days
       .slice(idx + 1)
@@ -125,59 +137,50 @@ function WeeklyMealSelection() {
     });
   };
 
+  if (checkingSubscription) {
+    return (
+      <div className="wms-body">
+        <Navbar />
+        <main style={{ padding: "64px 32px", textAlign: "center" }}>
+          Checking your subscription…
+        </main>
+      </div>
+    );
+  }
+
+  if (activeSubscription) {
+    return (
+      <div className="wms-body">
+        <Navbar />
+        <main
+          style={{
+            maxWidth: 600,
+            margin: "0 auto",
+            padding: "64px 32px",
+            textAlign: "center",
+          }}
+        >
+          <h1 style={{ fontSize: 24, marginBottom: 12 }}>
+            You already have an active plan
+          </h1>
+          <p style={{ color: "#5e5e5b", marginBottom: 24 }}>
+            Your current weekly plan runs until {activeSubscription.end_date}.
+            You can start a new selection once it ends.
+          </p>
+          <Link to="/profile" style={{ color: "#325f3f", fontWeight: 600 }}>
+            Go to your profile →
+          </Link>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <>
       <link
         href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap"
         rel="stylesheet"
       />
-
-      <style>{`
-        .wms-body { background: #fafaf4; color: #1a1c19; font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh; }
-        .wms-main { max-width: 1200px; margin: 0 auto;padding: 40px 32px 64px; display: grid; grid-template-columns: 2fr 1fr; gap: 32px; align-items: start; }
-        .wms-title { font-family: 'Hanken Grotesk', sans-serif; font-size: 32px; font-weight: 700; }
-        .wms-subtitle { font-size: 15px; color: #5e5e5b; margin-top: 6px; margin-bottom: 24px; }
-        .wms-tabs { display: flex; gap: 10px; margin-bottom: 24px; }
-        .wms-tab { flex: 1; text-align: center; padding: 12px 4px; border-radius: 12px; background: #f4f4ee; cursor: pointer; border: 2px solid transparent; }
-        .wms-tab.active { background: #325f3f; color: #fff; }
-        .wms-tab.filled:not(.active) { border-color: #bcefc5; }
-        .wms-tab-label { font-size: 11px; font-weight:700; letter-spacing: 0.05em; opacity: 0.8; }
-        .wms-tab-date { font-size: 18px; font-weight: 700; margin-top: 2px; }
-        .wms-section-title { font-size: 15px; font-weight: 600; margin-bottom: 12px; }
-        .wms-meal-card { background: #fff; border-radius: 16px; padding: 16px; display: flex; gap: 16px; box-shadow: 0 4px 20px rgba(26,28,25,0.04); margin-bottom: 24px; }
-        .wms-meal-img { width: 140px; height: 140px; border-radius: 12px; flex-shrink: 0; background: linear-gradient(135deg, #bcefc5, #325f3f); display: flex; align-items: center; justify-content: center; font-size: 40px; }
-        .wms-meal-img img { width: 100%; height: 100%;object-fit: cover; display: block; }
-        .wms-pick-img { width: 100%; height: 120px; border-radius: 10px; background: linear-gradient(135deg, #bcefc5, #325f3f); overflow: hidden; margin-bottom: 4px; }
-        .wms-pick-img img { width: 100%; height: 100%;object-fit: cover; display: block; }
-        .wms-meal-info { flex: 1; display: flex; flex-direction: column; }
-        .wms-tags { display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
-        .wms-tag { font-size: 11px; font-weight: 600; background: #eaf5ec; color: #325f3f; padding: 3px 10px;border-radius: 9999px; }
-        .wms-meal-name { font-family: 'Hanken Grotesk', sans-serif; font-size: 18px; font-weight: 700; }
-        .wms-meal-restaurant { font-size: 13px; font-weight: 700; color: #325f3f; margin-top: 2px; letter-spacing: 0.02em; }
-        .wms-meal-stats { display: flex; gap: 16px; margin-top: 10px; font-size: 12px; color: #414941; }
-        .wms-meal-footer { display: flex; align-items:center; justify-content: space-between; margin-top: auto; padding-top: 12px; }
-        .wms-change-btn { background: #f4f4ee; border:none; border-radius: 9999px; padding: 6px 16px; font-size: 12px; font-weight: 600; color: #325f3f; cursor: pointer; }
-        .wms-empty { background: #fff; border: 2px dashed #c1c9bf; border-radius: 16px; padding: 24px; text-align: center; color: #717971; margin-bottom: 24px; }
-        .wms-restaurant-group { margin-bottom: 32px; }
-        .wms-restaurant-heading { font-family: 'Hanken Grotesk', sans-serif; font-size: 18px; font-weight: 700; color: #1a1c19; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 2px solid #eceee9; }
-        .wms-pick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .wms-pick-card { background: #fff; border-radius: 14px; padding: 14px; box-shadow: 0 4px 20px rgba(26,28,25,0.04); border: 2px solid transparent; display: flex; flex-direction: column; gap: 6px; }
-        .wms-pick-card.chosen { border-color: #325f3f;}
-        .wms-pick-name { font-size: 14px; font-weight:700; }
-        .wms-pick-stats { font-size: 12px; color: #414941; display: flex; gap: 10px; }
-        .wms-pick-btn { align-self: flex-start; margin-top: 4px; background: #325f3f; color: #fff; border: none; border-radius: 9999px; padding: 6px 16px; font-size: 12px; font-weight: 600; cursor: pointer; }
-        .wms-pick-btn.chosen { background: #eaf5ec; color: #325f3f; }
-        .wms-error { background: #fdecea; color: #b3261e; border-radius: 12px; padding: 14px 16px; font-size:13px; margin-bottom: 20px; }
-
-        .wms-summary { background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(26,28,25,0.04); position: sticky; top: 24px; }
-        .wms-summary-title { font-family: 'Hanken Grotesk', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 16px; }
-        .wms-summary-row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 10px; color: #414941; }
-        .wms-summary-row strong { color: #1a1c19; }
-        .wms-total-row { display: flex; justify-content: space-between; font-family: 'Hanken Grotesk', sans-serif; font-size: 18px; font-weight: 700; margin: 16px 0; padding-top: 12px; border-top: 1px solid #eceee9; }
-        .wms-review-btn { width: 100%; background: #325f3f; color: #fff; border: none; height: 50px; border-radius: 9999px; font-size: 15px; font-weight: 600; cursor: pointer; }
-        .wms-review-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .wms-plan-note { font-size: 12px; color: #717971; margin-top: 12px; text-align: center; }
-      `}</style>
 
       <div className="wms-body">
         <Navbar />
@@ -215,7 +218,7 @@ function WeeklyMealSelection() {
                 </div>
                 <div className="wms-meal-info">
                   <div className="wms-tags">
-                    {(activeMeal.tags || []).map((tag)=> (
+                    {(activeMeal.tags || []).map((tag) => (
                       <span key={tag} className="wms-tag">{tag}</span>
                     ))}
                   </div>

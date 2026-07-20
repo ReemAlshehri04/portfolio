@@ -9,10 +9,9 @@ import {
 } from "../../services/auth";
 const PLAN_PRICE = 250.0;
 const TIME_SLOTS = [
-  { value: "08:00", label: "8:00 AM – 10:00 AM" },
-  { value: "10:00", label: "10:00 AM – 12:00 PM" },
+  { value: "12:00", label: "12:00 PM – 3:00 PM" },
+  { value: "15:00", label: "3:00 PM – 5:00 PM" },
   { value: "17:00", label: "5:00 PM – 7:00 PM" },
-  { value: "19:00", label: "7:00 PM – 9:00 PM" },
 ];
 function OrderSummary() {
   const navigate = useNavigate();
