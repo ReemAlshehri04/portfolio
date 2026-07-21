@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException, Header, Depends
+import psycopg2.errors
 from database import get_db_connection
 from schemas import (
     RestaurantListResponse,
@@ -89,6 +90,52 @@ def list_customers(admin_user: dict = Depends(verify_admin)):
         return {"customers": [dict(row) for row in rows]}
 
     except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+
+@router.delete("/customers/{user_id}")
+def delete_customer(user_id: int, admin_user: dict = Depends(verify_admin)):
+    """Delete a customer account. Blocked if the customer has existing orders/reviews."""
+    conn = None
+    cursor = None
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute(
+            "SELECT user_id FROM app_user WHERE user_id = %s AND user_type = 'client';",
+            (user_id,)
+        )
+
+        if not cursor.fetchone():
+            raise HTTPException(status_code=404, detail="Customer not found")
+
+        cursor.execute("DELETE FROM app_user WHERE user_id = %s;", (user_id,))
+        conn.commit()
+
+        return {"message": "Customer deleted successfully", "user_id": user_id}
+
+    except HTTPException:
+        raise
+
+    except psycopg2.errors.ForeignKeyViolation:
+        if conn:
+            conn.rollback()
+        raise HTTPException(
+            status_code=409,
+            detail="Cannot delete this customer — they have existing orders or reviews."
+        )
+
+    except Exception as e:
+        if conn:
+            conn.rollback()
         raise HTTPException(status_code=500, detail=str(e))
 
     finally:

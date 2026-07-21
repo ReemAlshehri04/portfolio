@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { authRequest } from "../../services/auth";
 import { useAuth } from "../../context/AuthContext";
+import "./AdminDashboard.css";
 
 const RESTAURANT_STATUS_COLORS = {
   Approved: { bg: "#e8f5e9", color: "#2e7d32" },
@@ -17,7 +18,7 @@ function restaurantStatus(r) {
 
 function AdminDashboard() {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
 
   const [stats, setStats] = useState({
     totalRestaurants: 0,
@@ -32,6 +33,8 @@ function AdminDashboard() {
   const [restaurantsError, setRestaurantsError] = useState("");
 
   useEffect(() => {
+    if (user?.user_type !== "admin") return;
+
     authRequest("/api/admin/overview")
       .then((data) =>
         setStats({
@@ -48,86 +51,25 @@ function AdminDashboard() {
       .then((data) => setRestaurants(data || []))
       .catch((err) => setRestaurantsError(err.message))
       .finally(() => setLoadingRestaurants(false));
-  }, []);
+  }, [user]);
 
   const handleLogout = () => {
     logout();
     navigate("/admin/login");
   };
 
+  if (!user) {
+    return <div style={{ padding: 48 }}>Please log in.</div>;
+  }
+
+  if (user.user_type !== "admin") {
+    return <div style={{ padding: 48 }}>Access denied. Admins only.</div>;
+  }
+
   return (
     <>
       <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
       <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
-
-      <style>{`
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        .admin-body { background: #fafaf4; font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh; display: flex; }
-
-        /* Sidebar */
-        .admin-sidebar { width: 260px; background: #fff; border-right: 1px solid #e8ebe8; display: flex; flex-direction: column; padding: 32px 0; position: fixed; height: 100vh; }
-        .admin-logo { font-family: 'Hanken Grotesk', sans-serif; font-size: 22px; font-weight: 700; color: #325f3f; padding: 0 24px 32px; border-bottom: 1px solid #e8ebe8; }
-        .admin-nav { display: flex; flex-direction: column; gap: 4px; padding: 24px 12px; flex: 1; }
-        .admin-nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 12px; font-size: 14px; font-weight: 500; color: #414941; cursor: pointer; transition: all 0.2s; text-decoration: none; }
-        .admin-nav-item:hover { background: #f4f4ee; color: #325f3f; }
-        .admin-nav-item.active { background: #e8f5e9; color: #325f3f; font-weight: 600; }
-        .admin-nav-item .material-symbols-outlined { font-size: 20px; }
-        .admin-sidebar-footer { padding: 16px 24px; border-top: 1px solid #e8ebe8; font-size: 12px; color: #717971; }
-
-        /* Main */
-        .admin-main { margin-left: 260px; flex: 1; padding: 40px 48px; }
-
-        /* Header */
-        .admin-header { margin-bottom: 32px; }
-        .admin-header h1 { font-family: 'Hanken Grotesk', sans-serif; font-size: 28px; font-weight: 700; color: #1a1c19; margin-bottom: 4px; }
-        .admin-header p { font-size: 14px; color: #5e5e5b; }
-
-        /* Stats Grid */
-        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 32px; }
-        .stat-card { background: #fff; border-radius: 20px; padding: 24px; border: 1px solid #e8ebe8; display: flex; flex-direction: column; gap: 12px; }
-        .stat-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
-        .stat-icon.green { background: #e8f5e9; }
-        .stat-icon.blue { background: #e3f2fd; }
-        .stat-icon.amber { background: #fff8e1; }
-        .stat-icon.red { background: #fce4ec; }
-        .stat-icon .material-symbols-outlined { font-size: 22px; }
-        .stat-icon.green .material-symbols-outlined { color: #325f3f; }
-        .stat-icon.blue .material-symbols-outlined { color: #1565c0; }
-        .stat-icon.amber .material-symbols-outlined { color: #f57f17; }
-        .stat-icon.red .material-symbols-outlined { color: #c62828; }
-        .stat-value { font-family: 'Hanken Grotesk', sans-serif; font-size: 32px; font-weight: 700; color: #1a1c19; }
-        .stat-label { font-size: 13px; color: #5e5e5b; font-weight: 500; }
-
-        /* Section */
-        .section-title { font-family: 'Hanken Grotesk', sans-serif; font-size: 18px; font-weight: 700; color: #1a1c19; margin-bottom: 16px; }
-        .section-card { background: #fff; border-radius: 20px; border: 1px solid #e8ebe8; overflow: hidden; margin-bottom: 24px; }
-
-        /* Quick Actions */
-        .quick-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 32px; }
-        .action-card { background: #fff; border-radius: 16px; padding: 20px; border: 1px solid #e8ebe8; display: flex; align-items: center; gap: 16px; cursor: pointer; transition: all 0.2s; text-decoration: none; }
-        .action-card:hover { border-color: #325f3f; box-shadow: 0 4px 12px rgba(50,95,63,0.1); }
-        .action-icon { width: 44px; height: 44px; background: #e8f5e9; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .action-icon .material-symbols-outlined { font-size: 22px; color: #325f3f; }
-        .action-text h3 { font-size: 14px; font-weight: 600; color: #1a1c19; margin-bottom: 2px; }
-        .action-text p { font-size: 12px; color: #5e5e5b; }
-
-        /* Pending badge */
-        .pending-badge { background: #fce4ec; color: #c62828; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 20px; margin-left: 8px; }
-
-        /* Logout */
-        .admin-logout-btn { width: 100%; background: none; border: none; color: #b3261e; font-size: 13px; font-weight: 600; cursor: pointer; padding: 0; text-align: left; }
-
-        /* Restaurants table */
-        .restaurants-table { width: 100%; border-collapse: collapse; }
-        .restaurants-table th { text-align: left; padding: 14px 24px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: #717971; border-bottom: 1px solid #e8ebe8; background: #fafaf4; }
-        .restaurants-table td { padding: 14px 24px; font-size: 14px; color: #1a1c19; border-bottom: 1px solid #f4f4ee; }
-        .restaurants-table tr:last-child td { border-bottom: none; }
-        .restaurant-status-pill { font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 9999px; }
-        .table-empty { padding: 40px; text-align: center; color: #717971; }
-        .table-error { padding: 24px; color: #b3261e; }
-
-        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; font-family: 'Material Symbols Outlined'; }
-      `}</style>
 
       <div className="admin-body">
         {/* Sidebar */}
@@ -265,7 +207,7 @@ function AdminDashboard() {
                             {status}
                           </span>
                         </td>
-                        <td>{new Date(r.created_at).toLocaleDateString()}</td>
+                        <td>{new Date(r.created_at).toLocaleDateString("en-GB")}</td>
                       </tr>
                     );
                   })}
