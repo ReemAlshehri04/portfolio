@@ -1,0 +1,214 @@
+BEGIN;
+
+-- ============================================================
+-- USERS
+-- ============================================================
+-- Admin login: admin@qooti-admin.com / Admin@Qooti123
+INSERT INTO app_user (user_type, full_name, email, password_hash, phone)
+VALUES (
+    'admin',
+    'Qooti Admin',
+    'admin@qooti-admin.com',
+    '$argon2id$v=19$m=65536,t=3,p=4$6n2Pca51TmktxVjLGcMYww$avJScbuB4S7VSCV5bGpYGK2SxN39xborSutvYJ3ileo',
+    '+966501234567'
+);
+
+-- Test client login: client@example.com / Restaurant123!
+INSERT INTO app_user (
+    user_type, full_name, email, password_hash, phone,
+    age, gender, height_cm, weight_kg, health_goal, address
+)
+VALUES (
+    'client',
+    'Test Client',
+    'client@example.com',
+    '$argon2id$v=19$m=65536,t=3,p=4$3dubU2otpfQeg1BKSSnFuA$orMI0X8GYVn0yvN9fUAEvmBmeha7KwpIV5KKUD500nM',
+    '+966505000001',
+    30, 'female', 165.00, 65.00, 'maintain', 'Riyadh, Saudi Arabia'
+);
+
+-- Restaurant-owner login for all accounts below: Restaurant123!
+INSERT INTO app_user (user_type, full_name, email, password_hash, phone)
+VALUES
+    ('restaurant', 'Qooti Restaurant Owner', 'qooti.owner@example.com', '$argon2id$v=19$m=65536,t=3,p=4$3dubU2otpfQeg1BKSSnFuA$orMI0X8GYVn0yvN9fUAEvmBmeha7KwpIV5KKUD500nM', '+966505000002'),
+    ('restaurant', 'Yousef Al-Ghamdi', 'greenfork.owner@example.com', '$argon2id$v=19$m=65536,t=3,p=4$3dubU2otpfQeg1BKSSnFuA$orMI0X8GYVn0yvN9fUAEvmBmeha7KwpIV5KKUD500nM', '+966504567890'),
+    ('restaurant', 'Sara Al-Fahad', 'greenbowl.owner@example.com', '$argon2id$v=19$m=65536,t=3,p=4$3dubU2otpfQeg1BKSSnFuA$orMI0X8GYVn0yvN9fUAEvmBmeha7KwpIV5KKUD500nM', '+966502345678'),
+    ('restaurant', 'Faisal Al-Mutairi', 'fitkitchen.owner@example.com', '$argon2id$v=19$m=65536,t=3,p=4$3dubU2otpfQeg1BKSSnFuA$orMI0X8GYVn0yvN9fUAEvmBmeha7KwpIV5KKUD500nM', '+966503456789');
+
+-- ============================================================
+-- RESTAURANTS
+-- ============================================================
+INSERT INTO restaurant (user_id, restaurant_name, description, logo_url, is_verified)
+VALUES
+    (
+        (SELECT user_id FROM app_user WHERE email = 'qooti.owner@example.com'),
+        'Qooti Restaurant',
+        'Restaurant for testing meal APIs',
+        NULL,
+        TRUE
+    ),
+    (
+        (SELECT user_id FROM app_user WHERE email = 'greenfork.owner@example.com'),
+        'Green Fork Bistro',
+        'Health-focused Mediterranean cuisine made with seasonal, locally-sourced ingredients.',
+        'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=400&fit=crop',
+        TRUE
+    ),
+    (
+        (SELECT user_id FROM app_user WHERE email = 'greenbowl.owner@example.com'),
+        'Green Bowl',
+        'Fresh, plant-forward healthy lunch bowls.',
+        'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&h=400&fit=crop',
+        TRUE
+    ),
+    (
+        (SELECT user_id FROM app_user WHERE email = 'fitkitchen.owner@example.com'),
+        'Fit Kitchen',
+        'High-protein, macro-balanced meals for active lifestyles.',
+        'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400&h=400&fit=crop',
+        TRUE
+    );
+
+-- ============================================================
+-- QOOTI RESTAURANT MEALS
+-- ============================================================
+INSERT INTO meal (
+    restaurant_id, name, description, ingredients, calories,
+    protein_g, carbs_g, fats_g, image_url, tags, is_available, created_at
+)
+VALUES
+    (
+        (SELECT restaurant_id FROM restaurant WHERE restaurant_name = 'Qooti Restaurant'),
+        'Updated Chicken Salad',
+        'Healthy grilled chicken salad',
+        'Chicken, lettuce, tomato',
+        400, 30.00, 15.00, 10.00,
+        'https://images.unsplash.com/photo-1546069901-ba9599a7e63c',
+        ARRAY['healthy', 'updated']::TEXT[], TRUE,
+        '2026-07-07 23:34:34.165107'
+    ),
+    (
+        (SELECT restaurant_id FROM restaurant WHERE restaurant_name = 'Qooti Restaurant'),
+        'Updated Grilled Salmon Bowl',
+        'Fresh grilled salmon served with brown rice and steamed vegetables.',
+        'Salmon, brown rice, broccoli, carrots, olive oil, lemon',
+        560, 38.00, 34.00, 22.00,
+        'https://images.pexels.com/photos/699953/pexels-photo-699953.jpeg',
+        ARRAY['healthy', 'seafood', 'updated']::TEXT[], TRUE,
+        '2026-07-08 18:47:27.779206'
+    );
+
+-- ============================================================
+-- GREEN FORK BISTRO MEALS
+-- ============================================================
+INSERT INTO meal (restaurant_id, name, description, ingredients, calories, protein_g, carbs_g, fats_g, tags, image_url)
+VALUES
+    (
+        (SELECT restaurant_id FROM restaurant WHERE restaurant_name = 'Green Fork Bistro'),
+        'Zesty Salmon & Asparagus',
+        'Pan-seared salmon with grilled asparagus and lemon herb sauce.',
+        'Salmon, asparagus, lemon, olive oil, garlic, herbs',
+        480, 38.50, 12.00, 28.00, ARRAY['HighProtein', 'GlutenFree'],
+        'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=800&q=80'
+    ),
+    (
+        (SELECT restaurant_id FROM restaurant WHERE restaurant_name = 'Green Fork Bistro'),
+        'Truffle Forest Grains',
+        'Ancient grain bowl with wild mushrooms and truffle oil.',
+        'Quinoa, farro, wild mushrooms, truffle oil, parmesan, arugula',
+        420, 16.00, 52.00, 14.00, ARRAY['LowCarb'],
+        'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&q=80'
+    ),
+    (
+        (SELECT restaurant_id FROM restaurant WHERE restaurant_name = 'Green Fork Bistro'),
+        'Mediterranean Chicken Bowl',
+        'Grilled chicken breast with hummus, tabbouleh, and pickled vegetables.',
+        'Chicken breast, hummus, bulgur, parsley, tomato, cucumber',
+        510, 42.00, 38.00, 18.00, ARRAY['HighProtein'],
+        'https://images.unsplash.com/photo-1543353071-873f17a7a088?w=800&q=80'
+    );
+
+-- ============================================================
+-- GREEN BOWL MEALS
+-- ============================================================
+INSERT INTO meal (restaurant_id, name, ingredients, calories, protein_g, carbs_g, fats_g, tags, image_url)
+VALUES
+    ((SELECT restaurant_id FROM restaurant WHERE restaurant_name = 'Green Bowl'), 'Grilled Chicken Quinoa Bowl', 'Grilled chicken breast, quinoa, roasted vegetables, tahini dressing', 450, 38.00, 42.00, 14.00, ARRAY['GlutenFree'], 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&h=600&fit=crop'),
+    ((SELECT restaurant_id FROM restaurant WHERE restaurant_name = 'Green Bowl'), 'Falafel Power Bowl', 'Baked falafel, hummus, cucumber, tomato, pickled onions, tahini', 420, 16.00, 55.00, 15.00, ARRAY['Vegan', 'PlantBased'], 'https://images.unsplash.com/photo-1547496502-affa22d38842?w=800&h=600&fit=crop'),
+    ((SELECT restaurant_id FROM restaurant WHERE restaurant_name = 'Green Bowl'), 'Salmon Avocado Salad', 'Grilled salmon, avocado, mixed greens, cherry tomatoes, lemon vinaigrette', 480, 34.00, 18.00, 28.00, ARRAY['GlutenFree', 'DairyFree'], 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=800&h=600&fit=crop'),
+    ((SELECT restaurant_id FROM restaurant WHERE restaurant_name = 'Green Bowl'), 'Vegetable Stir Fry with Tofu', 'Tofu, broccoli, carrots, bell peppers, brown rice, soy-ginger sauce', 390, 20.00, 48.00, 12.00, ARRAY['Vegan', 'PlantBased', 'DairyFree'], 'https://images.unsplash.com/photo-1585032226651-759b368d7246?w=800&h=600&fit=crop'),
+    ((SELECT restaurant_id FROM restaurant WHERE restaurant_name = 'Green Bowl'), 'Turkey Lettuce Wrap Plate', 'Ground turkey, lettuce cups, shredded carrots, sweet chili sauce', 360, 30.00, 20.00, 16.00, ARRAY['GlutenFree', 'DairyFree'], 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=800&h=600&fit=crop');
+
+-- ============================================================
+-- FIT KITCHEN MEALS
+-- ============================================================
+INSERT INTO meal (restaurant_id, name, ingredients, calories, protein_g, carbs_g, fats_g, tags, image_url)
+VALUES
+    ((SELECT restaurant_id FROM restaurant WHERE restaurant_name = 'Fit Kitchen'), 'Steak and Sweet Potato Plate', 'Grilled sirloin steak, roasted sweet potato, steamed green beans', 520, 42.00, 38.00, 20.00, ARRAY['GlutenFree', 'DairyFree'], 'https://images.unsplash.com/photo-1600891964092-4316c288032e?w=800&h=600&fit=crop'),
+    ((SELECT restaurant_id FROM restaurant WHERE restaurant_name = 'Fit Kitchen'), 'High-Protein Chicken Pasta', 'Grilled chicken, whole wheat pasta, spinach, light cream sauce', 510, 40.00, 50.00, 12.00, ARRAY[]::TEXT[], 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=800&h=600&fit=crop'),
+    ((SELECT restaurant_id FROM restaurant WHERE restaurant_name = 'Fit Kitchen'), 'Egg White Veggie Scramble', 'Egg whites, spinach, mushrooms, bell peppers, side of oats', 340, 30.00, 30.00, 8.00, ARRAY['Vegetarian', 'GlutenFree'], 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=800&h=600&fit=crop'),
+    ((SELECT restaurant_id FROM restaurant WHERE restaurant_name = 'Fit Kitchen'), 'Lean Beef Rice Bowl', 'Lean ground beef, jasmine rice, sauteed zucchini, garlic sauce', 480, 36.00, 45.00, 14.00, ARRAY['DairyFree'], 'https://images.unsplash.com/photo-1553163147-622ab57be1c7?w=800&h=600&fit=crop'),
+    ((SELECT restaurant_id FROM restaurant WHERE restaurant_name = 'Fit Kitchen'), 'Protein Shrimp Bowl', 'Grilled shrimp, brown rice, edamame, avocado, sriracha mayo', 440, 32.00, 40.00, 15.00, ARRAY['DairyFree'], 'https://images.unsplash.com/photo-1559847844-5315695dadae?w=800&h=600&fit=crop');
+
+-- ============================================================
+-- SUBSCRIPTIONS FOR TEST CLIENT
+-- ============================================================
+INSERT INTO subscription (
+    user_id, discount_code_id, start_date, end_date, delivery_time,
+    original_price, discount_amount, final_price, status, is_renewed, created_at
+)
+VALUES
+    (
+        (SELECT user_id FROM app_user WHERE email = 'client@example.com'),
+        NULL, '2026-07-12', '2026-07-16', '13:00:00',
+        100.00, 0.00, 100.00, 'confirmed', FALSE,
+        '2026-07-08 20:53:20.033913'
+    ),
+    (
+        (SELECT user_id FROM app_user WHERE email = 'client@example.com'),
+        NULL, '2026-07-19', '2026-07-23', '13:00:00',
+        100.00, 0.00, 100.00, 'confirmed', FALSE,
+        '2026-07-09 19:25:04.744757'
+    );
+
+-- ============================================================
+-- ORDER ITEMS FOR FIRST SUBSCRIPTION
+-- ============================================================
+INSERT INTO order_item (subscription_id, meal_id, day_date, day_of_week, status, created_at)
+VALUES
+    (
+        (
+            SELECT subscription_id
+            FROM subscription
+            WHERE user_id = (SELECT user_id FROM app_user WHERE email = 'client@example.com')
+              AND start_date = '2026-07-12'
+        ),
+        (
+            SELECT m.meal_id
+            FROM meal m
+            JOIN restaurant r ON r.restaurant_id = m.restaurant_id
+            WHERE r.restaurant_name = 'Qooti Restaurant'
+              AND m.name = 'Updated Chicken Salad'
+        ),
+        '2026-07-12', 'Sunday', 'confirmed',
+        '2026-07-08 20:54:55.925102'
+    ),
+    (
+        (
+            SELECT subscription_id
+            FROM subscription
+            WHERE user_id = (SELECT user_id FROM app_user WHERE email = 'client@example.com')
+              AND start_date = '2026-07-12'
+        ),
+        (
+            SELECT m.meal_id
+            FROM meal m
+            JOIN restaurant r ON r.restaurant_id = m.restaurant_id
+            WHERE r.restaurant_name = 'Qooti Restaurant'
+              AND m.name = 'Updated Grilled Salmon Bowl'
+        ),
+        '2026-07-13', 'Monday', 'confirmed',
+        '2026-07-08 23:17:46.108537'
+    );
+
+COMMIT;
