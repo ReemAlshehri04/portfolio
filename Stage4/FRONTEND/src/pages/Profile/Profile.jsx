@@ -3,15 +3,26 @@ import { useState, useEffect } from "react";
 import Navbar from "../../components/Navbar/Navbar";
 import { useAuth } from "../../context/AuthContext";
 import { authRequest } from "../../services/auth";
+
 const STATUS_COLORS = {
   confirmed: { bg: "#e6f4ea", color: "#188038" },
   pending: { bg: "#fff4e5", color: "#b06000" },
   cancelled: { bg: "#fdecea", color: "#b3261e" },
 };
+
 function Profile() {
   const { user, updateUser } = useAuth();
 
-  const [form, setForm] = useState({ full_name: "", phone: "", address: "" });
+  const [form, setForm] = useState({
+    full_name: "",
+    phone: "",
+    address: "",
+    age: "",
+    gender: "",
+    height_cm: "",
+    weight_kg: "",
+    health_goal: "",
+  });
   const [email, setEmail] = useState("");
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -30,6 +41,11 @@ function Profile() {
           full_name: data.user.full_name || "",
           phone: data.user.phone || "",
           address: data.user.address || "",
+          age: data.user.age ?? "",
+          gender: data.user.gender || "",
+          height_cm: data.user.height_cm ?? "",
+          weight_kg: data.user.weight_kg ?? "",
+          health_goal: data.user.health_goal || "",
         });
         setEmail(data.user.email || "");
       })
@@ -39,7 +55,6 @@ function Profile() {
 
   useEffect(() => {
     if (!user) return;
-
     const loadSubscription = async () => {
       setLoadingSub(true);
       setSubError("");
@@ -50,7 +65,7 @@ function Profile() {
 
         if (active) {
           const scheduleData = await authRequest(
-            `/api/subscriptions/${active.subscription_id}/schedule`
+            `/api/subscriptions/${active.subscription_id}/schedule`,
           );
           setSchedule(scheduleData.schedule || []);
         }
@@ -60,30 +75,63 @@ function Profile() {
         setLoadingSub(false);
       }
     };
-
     loadSubscription();
   }, [user]);
-
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
-
-  const handleSave = async (e) => {
-    e.preventDefault();
-    setSaving(true);
-    setSaveMessage("");
-    setSaveError("");
-    try {
-      const data = await authRequest("/api/users/me", "PUT", form);
-      updateUser({ full_name: data.user.full_name, phone: data.user.phone });
-      setSaveMessage("Profile updated successfully.");
-    } catch (err) {
-      setSaveError(err.message);
-    } finally {
-      setSaving(false);
-    }
-  };
-
+ const handleSave = async (e) => {
+  e.preventDefault();
+  setSaving(true);
+  setSaveMessage("");
+  setSaveError("");
+  const validationErrors = validateProfile();
+  if (validationErrors.length > 0) {
+    setSaveError(validationErrors.join(" "));
+    setSaving(false);
+    return;
+  }
+  try {
+    const data = await authRequest("/api/users/me", "PUT", {
+      full_name: form.full_name,
+      phone: form.phone,
+      address: form.address,
+      age: form.age === "" ? null : Number(form.age),
+      gender: form.gender,
+      height_cm: form.height_cm === "" ? null : Number(form.height_cm),
+      weight_kg: form.weight_kg === "" ? null : Number(form.weight_kg),
+      health_goal: form.health_goal,
+    });
+    updateUser({ full_name: data.user.full_name, phone: data.user.phone });
+    setSaveMessage("Profile updated successfully.");
+  } catch (err) {
+    setSaveError(err.message);
+  } finally {
+    setSaving(false);
+  }
+};
+    const validateProfile = () => {
+      const errors = [];
+      if (
+        form.age !== "" &&
+        (Number(form.age) < 13 || Number(form.age) > 100)
+      ) {
+        errors.push("Age must be between 13 and 100.");
+      }
+      if (
+        form.height_cm !== "" &&
+        (Number(form.height_cm) < 100 || Number(form.height_cm) > 250)
+      ) {
+        errors.push("Height must be between 100 and 250 cm.");
+      }
+      if (
+        form.weight_kg !== "" &&
+        (Number(form.weight_kg) < 30 || Number(form.weight_kg) > 300)
+      ) {
+        errors.push("Weight must be between 30 and 300 kg.");
+      }
+      return errors;
+    };
   return (
     <>
       <div className="profile-body">
@@ -102,7 +150,9 @@ function Profile() {
 
             <form onSubmit={handleSave}>
               <div className="profile-field">
-                <label className="profile-field-label" htmlFor="full_name">Full Name</label>
+                <label className="profile-field-label" htmlFor="full_name">
+                  Full Name
+                </label>
                 <input
                   id="full_name"
                   name="full_name"
@@ -114,7 +164,9 @@ function Profile() {
               </div>
 
               <div className="profile-field">
-                <label className="profile-field-label" htmlFor="phone">Phone</label>
+                <label className="profile-field-label" htmlFor="phone">
+                  Phone
+                </label>
                 <input
                   id="phone"
                   name="phone"
@@ -126,7 +178,9 @@ function Profile() {
               </div>
 
               <div className="profile-field">
-                <label className="profile-field-label" htmlFor="address">Delivery Address</label>
+                <label className="profile-field-label" htmlFor="address">
+                  Delivery Address
+                </label>
                 <input
                   id="address"
                   name="address"
@@ -137,7 +191,101 @@ function Profile() {
                 />
               </div>
 
-              <button className="profile-save-btn" type="submit" disabled={saving || loadingProfile}>
+              <div className="profile-field">
+                <label className="profile-field-label" htmlFor="age">
+                  Age
+                </label>
+                <input
+                  id="age"
+                  name="age"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  className="profile-input"
+                  value={form.age}
+                  onChange={handleChange}
+                  disabled={loadingProfile}
+                />
+              </div>
+
+              <div className="profile-field">
+                <label className="profile-field-label" htmlFor="gender">
+                  Gender
+                </label>
+                <select
+                  id="gender"
+                  name="gender"
+                  className="profile-input"
+                  value={form.gender}
+                  onChange={handleChange}
+                  disabled={loadingProfile}
+                >
+                  <option value="">Select</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                </select>
+              </div>
+
+              <div className="profile-field">
+                <label className="profile-field-label" htmlFor="height_cm">
+                  Height (cm)
+                </label>
+                <input
+                  id="height_cm"
+                  name="height_cm"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  dir="ltr"
+                  className="profile-input"
+                  value={form.height_cm}
+                  onChange={handleChange}
+                  disabled={loadingProfile}
+                />
+              </div>
+
+              <div className="profile-field">
+                <label className="profile-field-label" htmlFor="weight_kg">
+                  Weight (kg)
+                </label>
+                <input
+                  id="weight_kg"
+                  name="weight_kg"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  className="profile-input"
+                  value={form.weight_kg}
+                  onChange={handleChange}
+                  disabled={loadingProfile}
+                />
+              </div>
+
+              <div className="profile-field">
+                <label className="profile-field-label" htmlFor="health_goal">
+                  Health Goal
+                </label>
+                <select
+                  id="health_goal"
+                  name="health_goal"
+                  className="profile-input"
+                  value={form.health_goal}
+                  onChange={handleChange}
+                  disabled={loadingProfile}
+                >
+                  <option value="">Select</option>
+                  <option value="lose_weight">Lose Weight</option>
+                  <option value="maintain">Maintain Healthy Weight</option>
+                  <option value="bulking">Bulking</option>
+                  <option value="gaining_weight">Gaining Weight</option>
+                </select>
+              </div>
+
+              <button
+                className="profile-save-btn"
+                type="submit"
+                disabled={saving || loadingProfile}
+              >
                 {saving ? "Saving..." : "Save Changes"}
               </button>
 
@@ -155,7 +303,8 @@ function Profile() {
               <p>Loading...</p>
             ) : !subscription ? (
               <div className="cd-empty">
-                You don't have an active subscription yet. Head to Meal Plans to get started.
+                You don't have an active subscription yet. Head to Meal Plans to
+                get started.
               </div>
             ) : (
               <>
@@ -164,8 +313,10 @@ function Profile() {
                   <span
                     className="cd-status-badge"
                     style={{
-                      background: STATUS_COLORS[subscription.status]?.bg || "#f4f4ee",
-                      color: STATUS_COLORS[subscription.status]?.color || "#414941",
+                      background:
+                        STATUS_COLORS[subscription.status]?.bg || "#f4f4ee",
+                      color:
+                        STATUS_COLORS[subscription.status]?.color || "#414941",
                     }}
                   >
                     {subscription.status}
@@ -175,19 +326,27 @@ function Profile() {
                 <div className="cd-grid">
                   <div>
                     <div className="cd-field-label">Start Date</div>
-                    <div className="cd-field-value">{subscription.start_date}</div>
+                    <div className="cd-field-value">
+                      {subscription.start_date}
+                    </div>
                   </div>
                   <div>
                     <div className="cd-field-label">End Date</div>
-                    <div className="cd-field-value">{subscription.end_date}</div>
+                    <div className="cd-field-value">
+                      {subscription.end_date}
+                    </div>
                   </div>
                   <div>
                     <div className="cd-field-label">Delivery Time</div>
-                    <div className="cd-field-value">{subscription.delivery_time}</div>
+                    <div className="cd-field-value">
+                      {subscription.delivery_time}
+                    </div>
                   </div>
                   <div>
                     <div className="cd-field-label">Final Price</div>
-                    <div className="cd-field-value">SAR {subscription.final_price}</div>
+                    <div className="cd-field-value">
+                      SAR {subscription.final_price}
+                    </div>
                   </div>
                 </div>
               </>
@@ -211,7 +370,9 @@ function Profile() {
                     <tr key={row.order_item_id}>
                       <td>{row.day_of_week}</td>
                       <td>{row.name}</td>
-                      <td style={{ textTransform: "capitalize" }}>{row.status}</td>
+                      <td style={{ textTransform: "capitalize" }}>
+                        {row.status}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -222,6 +383,6 @@ function Profile() {
       </div>
     </>
   );
-}
+} 
 
 export default Profile;
