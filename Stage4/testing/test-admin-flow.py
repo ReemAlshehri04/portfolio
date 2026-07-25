@@ -3,9 +3,9 @@ Admin-flow test suite — Qooti Healthy Meals Platform.
 
 Run with the backend venv (has requests + psycopg2) while the server is up:
 
-    cd BACKEND/project/backend
-    .venv/bin/python -m uvicorn main:app                     # terminal 1
-    .venv/bin/python ../../../testing/test-admin-flow.py     # terminal 2
+    cd BACKEND
+    .venv/bin/python -m uvicorn main:app               # terminal 1
+    .venv/bin/python ../testing/test-admin-flow.py     # terminal 2
 
 Covers the admin panel end-to-end (automating the previously manual
 AR/AP cases from test-cases-restaurants-meals_reselt.md, plus the
@@ -33,7 +33,7 @@ from psycopg2.extras import RealDictCursor
 BASE_URL = "http://127.0.0.1:8000"
 
 # Read DB credentials from the backend .env (DATABASE_URL)
-ENV_FILE = Path(__file__).resolve().parents[1] / "BACKEND" / "project" / "backend" / ".env"
+ENV_FILE = Path(__file__).resolve().parents[1] / "BACKEND" / ".env"
 DATABASE_URL = None
 for line in ENV_FILE.read_text().splitlines():
     if line.strip().startswith("DATABASE_URL="):
@@ -41,8 +41,8 @@ for line in ENV_FILE.read_text().splitlines():
 if not DATABASE_URL:
     sys.exit("DATABASE_URL not found in backend .env")
 
-# Admin emails must be on @qooti_admin.com (DB chk_admin_email_domain)
-ADMIN = {"email": "qa.adminflow.admin@qooti_admin.com", "password": "Passw0rd!"}
+# Admin emails must be on @qooti-admin.com (DB chk_admin_email_domain)
+ADMIN = {"email": "qa.adminflow.admin@qooti-admin.com", "password": "Passw0rd!"}
 CLIENT = {"email": "qa.adminflow.client@example.com", "password": "Passw0rd!"}
 REST_C = {"email": "qa.adminflow.rest.c@example.com", "password": "Passw0rd!"}  # → approved
 REST_D = {"email": "qa.adminflow.rest.d@example.com", "password": "Passw0rd!"}  # → rejected

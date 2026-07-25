@@ -3,9 +3,9 @@ Restaurant-flow test suite — Qooti Healthy Meals Platform.
 
 Run with the backend venv (has requests + psycopg2) while the server is up:
 
-    cd BACKEND/project/backend
-    .venv/bin/python -m uvicorn main:app                        # terminal 1
-    .venv/bin/python ../../../testing/test-restaurant-flow.py   # terminal 2
+    cd BACKEND
+    .venv/bin/python -m uvicorn main:app                  # terminal 1
+    .venv/bin/python ../testing/test-restaurant-flow.py   # terminal 2
 
 Covers the full restaurant lifecycle end-to-end:
   Onboarding   — restaurant registers → pending → admin approves/rejects →
@@ -35,7 +35,7 @@ from psycopg2.extras import RealDictCursor
 BASE_URL = "http://127.0.0.1:8000"
 
 # Read DB credentials from the backend .env (DATABASE_URL)
-ENV_FILE = Path(__file__).resolve().parents[1] / "BACKEND" / "project" / "backend" / ".env"
+ENV_FILE = Path(__file__).resolve().parents[1] / "BACKEND" / ".env"
 DATABASE_URL = None
 for line in ENV_FILE.read_text().splitlines():
     if line.strip().startswith("DATABASE_URL="):
@@ -45,8 +45,8 @@ if not DATABASE_URL:
 
 REST_A = {"email": "qa.flow.rest.a@example.com", "password": "Passw0rd!"}
 REST_B = {"email": "qa.flow.rest.b@example.com", "password": "Passw0rd!"}
-# Admin emails must be on @qooti_admin.com (DB chk_admin_email_domain)
-ADMIN = {"email": "qa.flow.admin@qooti_admin.com", "password": "Passw0rd!"}
+# Admin emails must be on @qooti-admin.com (DB chk_admin_email_domain)
+ADMIN = {"email": "qa.flow.admin@qooti-admin.com", "password": "Passw0rd!"}
 CLIENT_A = {"email": "qa.flow.client.a@example.com", "password": "Passw0rd!"}
 CLIENT_B = {"email": "qa.flow.client.b@example.com", "password": "Passw0rd!"}
 
