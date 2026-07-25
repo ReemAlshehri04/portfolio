@@ -23,6 +23,7 @@ fresh subscription is created each run so selection tests start clean.
 Requires only the local server + PostgreSQL (no internet access).
 """
 
+import os
 import re
 import sys
 from datetime import date
@@ -32,16 +33,29 @@ import psycopg2
 import requests
 from psycopg2.extras import RealDictCursor
 
-BASE_URL = "http://127.0.0.1:8000"
+# Which deployment to test. Defaults to the local dev server; set
+# QOOTI_BASE_URL to point at staging or production.
+BASE_URL = os.getenv("QOOTI_BASE_URL", "http://127.0.0.1:8000").rstrip("/")
 
-# Read DB credentials from the backend .env (DATABASE_URL)
-ENV_FILE = Path(__file__).resolve().parents[1] / "BACKEND" / ".env"
-DATABASE_URL = None
-for line in ENV_FILE.read_text().splitlines():
-    if line.strip().startswith("DATABASE_URL="):
-        DATABASE_URL = line.split("=", 1)[1].strip()
+# DB credentials come from the backend .env unless QOOTI_DATABASE_URL overrides
+# them — a remote BASE_URL needs the matching remote database, or the
+# assertions would be checking the wrong rows.
+DATABASE_URL = os.getenv("QOOTI_DATABASE_URL")
 if not DATABASE_URL:
-    sys.exit("DATABASE_URL not found in backend .env")
+    ENV_FILE = Path(__file__).resolve().parents[1] / "BACKEND" / ".env"
+    for line in ENV_FILE.read_text().splitlines():
+        if line.strip().startswith("DATABASE_URL="):
+            DATABASE_URL = line.split("=", 1)[1].strip()
+if not DATABASE_URL:
+    sys.exit("No database URL: set QOOTI_DATABASE_URL, or DATABASE_URL in the backend .env")
+
+# These suites are not read-only — they register users, edit restaurant rows,
+# and (in the payments suite) install fault-injection triggers. Pointing them
+# at a shared or live environment has to be a deliberate act, not a typo.
+if not BASE_URL.startswith(("http://127.0.0.1", "http://localhost", "http://[::1]")) \
+        and os.getenv("QOOTI_ALLOW_REMOTE") != "1":
+    sys.exit(f"Refusing to run against {BASE_URL}: these suites write to the target "
+             "database. Re-run with QOOTI_ALLOW_REMOTE=1 if that is intended.")
 
 REST_A = {"email": "qa.flow.rest.a@example.com", "password": "Passw0rd!"}
 REST_B = {"email": "qa.flow.rest.b@example.com", "password": "Passw0rd!"}
