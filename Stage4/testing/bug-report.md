@@ -22,7 +22,7 @@ Severity uses the labels agreed in the sprint plan:
 | ID | Title | Area | Severity | Status |
 |---|---|---|---|---|
 | BUG-01 | Empty password accepted by request validation | Auth | Critical | **Fixed** |
-| BUG-02 | JWT signing key is guessable and committed to the repository | Auth | Critical | **Open (partially addressed)** |
+| BUG-02 | Weak JWT signing key, committed to the repository | Auth | Critical | **Fixed** |
 | BUG-12 | Payment page never sends the card fields — checkout always 422s | Frontend | Critical | **Open** |
 | BUG-13 | Payment page hardcodes `127.0.0.1`, bypassing `VITE_API_BASE_URL` | Frontend | Critical | **Open** |
 | BUG-03 | Invalid email format not rejected | Auth | Major | **Fixed** |
@@ -35,9 +35,11 @@ Severity uses the labels agreed in the sprint plan:
 | BUG-10 | Unknown `?status=` filter value silently ignored | Admin | Minor | **Open (accepted)** |
 | BUG-11 | Result docs misspelled `_reselt`, breaking README links | Docs | Minor | **Fixed** |
 
-**Totals:** 13 defects — 8 fixed, 5 open.
-Of the open items, **BUG-02, BUG-12, and BUG-13 must all be fixed before the
-production deploy.** BUG-12 in particular means no customer can currently pay.
+**Totals:** 13 defects — 9 fixed, 4 open.
+Of the open items, **BUG-12 and BUG-13 must both be fixed before release.**
+BUG-12 means no customer can currently pay through the UI. The remaining two
+open items are documented decisions rather than outstanding work: BUG-06 is a
+schema change deferred by team agreement, and BUG-10 is an accepted contract.
 
 ---
 
@@ -109,82 +111,6 @@ development only because the backend happens to be on that address locally.
 **Recommended fix:** route it through the same `VITE_API_BASE_URL` the rest of
 the app uses, and set that variable to the deployed backend URL in the Vercel
 project settings — `FRONTEND/.env` currently pins it to `http://localhost:8000`.
-
----
-
-### BUG-02 — The JWT signing key is guessable and committed to the repository
-**Severity:** Critical · **Area:** Authentication · **Status:** Open (partially addressed)
-
-**Re-verified 2026-07-27.** This entry was originally filed as *"`SECRET_KEY` is
-unset — JWTs signed with an unconfigured key."* That is no longer accurate:
-`SECRET_KEY` has since been added to the backend `.env` and loads correctly
-(confirmed via `dotenv_values`). The original finding is therefore **resolved**.
-The entry stays Critical for two reasons that the original wording did not
-cover, both of which are still live.
-
-[`auth.py`](../BACKEND/auth.py) reads the key from the environment and uses it to
-sign and verify every access token:
-
-```python
-SECRET_KEY = os.getenv("SECRET_KEY")
-ALGORITHM = "HS256"
-```
-
-**1. The key is low-entropy.** Its value is the project name followed by the
-words "secret key" — 16 characters, no randomness. HS256 is a symmetric
-algorithm, so anyone holding a single issued token can brute-force the key
-offline, at no cost to the server and with nothing to trigger a rate limit. A
-wordlist attack reaches a value of this shape quickly.
-
-**2. The key is in version control.** `Stage4/BACKEND/.env` is **tracked** —
-`.gitignore` does not list `.env`, and the file has been committed since
-`38841e5`. Anyone with repository access can read the signing key directly
-without attacking it at all. If this repository is or ever becomes public, the
-key is public with it, and remains recoverable from git history even after the
-file is removed from the working tree.
-
-**Impact.** With the signing key, an attacker forges a token naming any
-`user_id` and `user_type`. `get_current_user` verifies it as genuine, which
-defeats every role check in the system, including `verify_admin` and the
-admin-only routes behind it. Session security currently rests on the repository
-staying private.
-
-**Repro:**
-
-```bash
-git ls-files --error-unmatch Stage4/BACKEND/.env   # tracked
-grep -c SECRET_KEY Stage4/BACKEND/.env             # 1 — set, and readable
-git log --oneline --all -- "*/.env"                # present across 8 commits
-```
-
-**Honest caveat:** this was found by code and configuration inspection. I did
-**not** attempt to forge a token or crack the key, so the severity reflects the
-weakness of the control, not a demonstrated bypass.
-
-**Recommended fix:**
-
-1. Generate a strong random secret — `python3 -c "import secrets;
-   print(secrets.token_urlsafe(64))"`.
-2. Set it in the production environment's config vars (Render/Railway), **not**
-   in a committed file.
-3. Add `.env` to `.gitignore`, `git rm --cached` both tracked `.env` files, and
-   commit a `.env.example` listing variable names with empty values.
-4. Make `auth.py` fail fast at import rather than starting with no key:
-
-```python
-SECRET_KEY = os.getenv("SECRET_KEY")
-if not SECRET_KEY:
-    raise RuntimeError("SECRET_KEY is not configured")
-```
-
-Rotating the key invalidates existing tokens, which is fine — nobody is in a
-live session yet.
-
-**Note:** removing `.env` from the working tree does not remove it from history.
-Because the committed values are a local-only `DATABASE_URL` and a Moyasar
-**sandbox** key, rewriting history is not proportionate here; rotating the JWT
-secret and moving it out of the repo is. Any credential that becomes
-production-real must be issued fresh, never reused from these files.
 
 ---
 
@@ -261,6 +187,61 @@ profile and an empty password would have had an account created with no password
 
 **Verified 2026-07-25:** empty and short passwords → **422**, no row created.
 Regression-locked by `REG7` in [`test-customer-flow.py`](test-customer-flow.py).
+
+---
+
+### BUG-02 — Weak JWT signing key, committed to the repository
+**Severity:** Critical · **Area:** Authentication · **Status:** Fixed — verified 2026-07-27
+
+This entry was filed twice over. Originally: *"`SECRET_KEY` is unset — JWTs
+signed with an unconfigured key."* On re-verification the key had been added but
+was `qooti_secret_key` — the project name plus the words "secret key", 16
+characters, no randomness — and `Stage4/BACKEND/.env` was **tracked in git**, so
+the signing key was readable by anyone with repository access. HS256 is
+symmetric, so either weakness alone would let an attacker forge a token naming
+any `user_id`/`user_type` and defeat every role check, including `verify_admin`.
+
+**Fix — four parts, all verified:**
+
+| Part | Result |
+|---|---|
+| Key regenerated | 86-char `secrets.token_urlsafe(64)` value, local and Railway issued separately |
+| `.env` untracked | `git rm --cached` on both files in `0ba58da`; they remain on disk |
+| Ignored going forward | Two `.gitignore` files consolidated to one at the root that ignores `.env`/`.env.*` while allowing `.env.example`; templates added for backend and frontend |
+| Fail-fast guard | [`auth.py`](../BACKEND/auth.py) now raises at import if the key is absent |
+
+```python
+SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+    raise RuntimeError("SECRET_KEY is not configured")
+```
+
+The guard was tested both directions: import succeeds with the key set, and
+raises `RuntimeError: SECRET_KEY is not configured` without it. This matters
+more than it looks — before it existed, a misspelled variable in the deployment
+config would let the service boot and fail confusingly at first login instead of
+failing the deploy.
+
+**Verified against the deployed environment 2026-07-27.**
+[`smoke-check.py`](smoke-check.py) against the Railway backend: `USR1` login
+returned a token, `USR2` used it to open `/api/users/me`, `USR3` confirmed the
+returned profile matched the account that logged in. Signing and verification
+therefore round-trip with a real key in production. `SEC2` and `SEC3` confirm
+that a missing or malformed token is still rejected with 401.
+
+**Scope of that evidence — stated precisely.** The round-trip proves the
+deployed key works; it does not prove it is the specific value generated for
+that environment, since any valid secret would pass identically. Confirming the
+exact value requires reading it back from the host's config vars. `SEC3` sends a
+malformed token, so it exercises token parsing, not signature verification —
+it is not evidence about the key.
+
+**Residual risk, accepted:** `qooti_secret_key` remains recoverable from git
+history (commits `38841e5` through `0ba58da`). This is deliberate and safe —
+the key was rotated, so the value in history signs nothing. The other committed
+values were a `localhost` `DATABASE_URL` and a Moyasar **sandbox** key, so
+rewriting history was judged disproportionate. Any credential that becomes
+production-real must be issued fresh, never reused from those files.
 
 ---
 
@@ -414,6 +395,34 @@ and deleting the QA customer's data — so a non-localhost target requires an
 explicit `QOOTI_ALLOW_REMOTE=1`, and they belong against staging rather than
 production. For the live environment use [`smoke-check.py`](smoke-check.py): 17
 read-only checks over health, public browsing, and auth enforcement, with no
-database connection and no third-party dependencies. It has not yet been run
-against a deployed URL, because nothing is deployed yet — that is the last step
-of the Sprint 4 checklist.
+database connection and no third-party dependencies.
+
+**Run against the deployed environment, 2026-07-27 — 17 passed, 0 failed, 0
+skipped.** Backend on Railway, frontend origin on Vercel.
+
+| Group | Cases | Result |
+|---|---|---|
+| Service is up | 2 | passed — `/health` 200, API version 1.0.0 |
+| Public browsing | 5 | passed — 4 approved restaurants, full nutrition on every card, clean 404 for an unknown restaurant |
+| Auth enforcement | 6 | passed — missing, malformed, and non-existent-account requests all 401; no internals leaked in the error body |
+| CORS | 1 | passed — preflight echoes the deployed frontend origin exactly, not a wildcard |
+| Authenticated round-trip | 3 | passed — login issued a token, the token opened `/api/users/me`, the profile matched the account |
+
+Three things this establishes beyond "the service responds":
+
+* **The deployed signing key works.** The authenticated round-trip is the
+  evidence behind closing BUG-02 — a token was issued and then verified by the
+  same key in the live environment.
+* **`FRONTEND_URL` is configured correctly.** The preflight returns the exact
+  Vercel origin. This is the failure mode that no terminal-based check would
+  otherwise catch: a wrong value leaves the backend looking perfectly healthy
+  over curl while every request from the real frontend is blocked by the
+  browser.
+* **The database was provisioned from the current schema.** This is the first
+  environment built without the discarded `review` table.
+
+**What a green run here still does not cover.** Every check is an API call, so
+this says nothing about whether the pages work — the same blind spot described
+above, and the reason BUG-12 survived a fully green regression suite. The
+deployment is verified as *reachable and correctly configured*, not as
+*usable end to end*. Checkout in particular is still broken in the browser.
