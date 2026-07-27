@@ -67,7 +67,16 @@ Create a `.env` in `BACKEND/` with:
 | `MOYASAR_SECRET_KEY` | Moyasar sandbox API key |
 | `FRONTEND_URL` | Deployed frontend origin, added to CORS allow-list |
 
-Load the schema and seed data with `schema.sql` and `seed_data.sql`.
+Load the schema, then the seed data:
+
+```bash
+psql "$DATABASE_URL" -f schema.sql
+psql "$DATABASE_URL" -f seed_combined.sql
+```
+
+The seed creates the admin account, a test client, and four restaurant
+partners with their meals. Dev logins are listed in the comments at the top of
+`seed.sql`.
 
 ### Frontend
 

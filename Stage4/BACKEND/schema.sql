@@ -224,29 +224,3 @@ CREATE TABLE payment (
         ON DELETE RESTRICT
         ON UPDATE CASCADE
 );
-
--- ============================================================
--- review
--- ============================================================
-CREATE TABLE review (
-    review_id       SERIAL      NOT NULL,
-    order_item_id   INT         NOT NULL,
-    user_id         INT         NOT NULL,
-    rating          INT         NOT NULL,
-    comment         TEXT        DEFAULT NULL,
-    created_at      TIMESTAMP   NOT NULL DEFAULT NOW(),
-
-    CONSTRAINT pk_review PRIMARY KEY (review_id),
-    CONSTRAINT uq_review_order_item UNIQUE (order_item_id),
-    CONSTRAINT chk_rating CHECK (rating >= 1 AND rating <= 5),
-    CONSTRAINT fk_review_order_item
-        FOREIGN KEY (order_item_id)
-        REFERENCES order_item (order_item_id)
-        ON DELETE RESTRICT
-        ON UPDATE CASCADE,
-    CONSTRAINT fk_review_user
-        FOREIGN KEY (user_id)
-        REFERENCES app_user (user_id)
-        ON DELETE RESTRICT
-        ON UPDATE CASCADE
-);

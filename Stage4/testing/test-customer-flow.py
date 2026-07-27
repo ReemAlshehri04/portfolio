@@ -242,17 +242,12 @@ def purge_customer(email):
     """Delete a customer and everything hanging off them.
 
     Every FK in the schema is ON DELETE RESTRICT, so children go first:
-    review → order_item → payment → subscription → app_user.
+    order_item → payment → subscription → app_user.
     """
     user = db_one("SELECT user_id FROM app_user WHERE email = %s;", (email,))
     if not user:
         return
     uid = user["user_id"]
-    db_exec("""
-        DELETE FROM review WHERE user_id = %s OR order_item_id IN (
-            SELECT order_item_id FROM order_item
-            WHERE subscription_id IN (SELECT subscription_id FROM subscription WHERE user_id = %s));
-    """, (uid, uid))
     db_exec("""
         DELETE FROM order_item WHERE subscription_id IN (
             SELECT subscription_id FROM subscription WHERE user_id = %s);
