@@ -101,7 +101,7 @@ def list_customers(admin_user: dict = Depends(verify_admin)):
 
 @router.delete("/customers/{user_id}")
 def delete_customer(user_id: int, admin_user: dict = Depends(verify_admin)):
-    """Delete a customer account. Blocked if the customer has existing orders/reviews."""
+    """Delete a customer account. Blocked if the customer has existing orders."""
     conn = None
     cursor = None
 
@@ -130,7 +130,7 @@ def delete_customer(user_id: int, admin_user: dict = Depends(verify_admin)):
             conn.rollback()
         raise HTTPException(
             status_code=409,
-            detail="Cannot delete this customer — they have existing orders or reviews."
+            detail="Cannot delete this customer — they have existing orders."
         )
 
     except Exception as e:
