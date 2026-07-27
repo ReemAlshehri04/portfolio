@@ -1,7 +1,7 @@
 # Final Bug Report — Qooti Healthy Meals Platform
 
 **Sprint 4 deliverable — QA Lead**
-**Compiled:** 2026-07-25
+**Compiled:** 2026-07-25 · **Open items re-verified:** 2026-07-27
 **Scope:** every defect found across Sprints 1–4, in the application and in the
 test tooling itself.
 **Sources:** manual Postman runs (Sprints 1–2), the three automated suites in this
@@ -22,7 +22,7 @@ Severity uses the labels agreed in the sprint plan:
 | ID | Title | Area | Severity | Status |
 |---|---|---|---|---|
 | BUG-01 | Empty password accepted by request validation | Auth | Critical | **Fixed** |
-| BUG-02 | `SECRET_KEY` unset — JWTs signed with an unconfigured key | Auth | Critical | **Open** |
+| BUG-02 | JWT signing key is guessable and committed to the repository | Auth | Critical | **Open (partially addressed)** |
 | BUG-12 | Payment page never sends the card fields — checkout always 422s | Frontend | Critical | **Open** |
 | BUG-13 | Payment page hardcodes `127.0.0.1`, bypassing `VITE_API_BASE_URL` | Frontend | Critical | **Open** |
 | BUG-03 | Invalid email format not rejected | Auth | Major | **Fixed** |
@@ -112,40 +112,64 @@ project settings — `FRONTEND/.env` currently pins it to `http://localhost:8000
 
 ---
 
-### BUG-02 — `SECRET_KEY` is unset; JWTs are signed with an unconfigured key
-**Severity:** Critical · **Area:** Authentication · **Status:** Open
+### BUG-02 — The JWT signing key is guessable and committed to the repository
+**Severity:** Critical · **Area:** Authentication · **Status:** Open (partially addressed)
 
-[`auth.py`](../BACKEND/auth.py) reads `SECRET_KEY` from the environment and uses it
-to sign every access token:
+**Re-verified 2026-07-27.** This entry was originally filed as *"`SECRET_KEY` is
+unset — JWTs signed with an unconfigured key."* That is no longer accurate:
+`SECRET_KEY` has since been added to the backend `.env` and loads correctly
+(confirmed via `dotenv_values`). The original finding is therefore **resolved**.
+The entry stays Critical for two reasons that the original wording did not
+cover, both of which are still live.
+
+[`auth.py`](../BACKEND/auth.py) reads the key from the environment and uses it to
+sign and verify every access token:
 
 ```python
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
 ```
 
-`SECRET_KEY` is defined **neither in the backend `.env`** (which sets only
-`DATABASE_URL`, `MOYASAR_SECRET_KEY`, and `FRONTEND_URL`) **nor in the shell
-environment**. `os.getenv` therefore returns `None`, yet login still issues
-tokens — so signing is proceeding with an unconfigured key rather than failing
-loudly.
+**1. The key is low-entropy.** Its value is the project name followed by the
+words "secret key" — 16 characters, no randomness. HS256 is a symmetric
+algorithm, so anyone holding a single issued token can brute-force the key
+offline, at no cost to the server and with nothing to trigger a rate limit. A
+wordlist attack reaches a value of this shape quickly.
 
-**Impact.** The security of every session depends on an attacker not being able
-to guess the signing key. An unset key is not a secret. If it is guessable, a
-forged token naming any `user_id`/`user_type` would be accepted by
-`get_current_user`, which would defeat every role check in the system —
-including the admin-only routes.
+**2. The key is in version control.** `Stage4/BACKEND/.env` is **tracked** —
+`.gitignore` does not list `.env`, and the file has been committed since
+`38841e5`. Anyone with repository access can read the signing key directly
+without attacking it at all. If this repository is or ever becomes public, the
+key is public with it, and remains recoverable from git history even after the
+file is removed from the working tree.
 
-**Repro:** `grep SECRET_KEY BACKEND/.env` → no match; `env | grep SECRET_KEY` → no
-match; log in and observe that a token is still returned.
+**Impact.** With the signing key, an attacker forges a token naming any
+`user_id` and `user_type`. `get_current_user` verifies it as genuine, which
+defeats every role check in the system, including `verify_admin` and the
+admin-only routes behind it. Session security currently rests on the repository
+staying private.
+
+**Repro:**
+
+```bash
+git ls-files --error-unmatch Stage4/BACKEND/.env   # tracked
+grep -c SECRET_KEY Stage4/BACKEND/.env             # 1 — set, and readable
+git log --oneline --all -- "*/.env"                # present across 8 commits
+```
 
 **Honest caveat:** this was found by code and configuration inspection. I did
-**not** attempt to forge a token to prove exploitability, so the severity is
-based on the missing control, not on a demonstrated bypass. It should be treated
-as Critical until the key is configured, at which point the question is moot.
+**not** attempt to forge a token or crack the key, so the severity reflects the
+weakness of the control, not a demonstrated bypass.
 
-**Recommended fix:** generate a strong random secret, set it in the backend
-`.env` and in the production environment (Render/Railway config vars), and make
-`auth.py` fail fast at import if it is missing:
+**Recommended fix:**
+
+1. Generate a strong random secret — `python3 -c "import secrets;
+   print(secrets.token_urlsafe(64))"`.
+2. Set it in the production environment's config vars (Render/Railway), **not**
+   in a committed file.
+3. Add `.env` to `.gitignore`, `git rm --cached` both tracked `.env` files, and
+   commit a `.env.example` listing variable names with empty values.
+4. Make `auth.py` fail fast at import rather than starting with no key:
 
 ```python
 SECRET_KEY = os.getenv("SECRET_KEY")
@@ -155,6 +179,12 @@ if not SECRET_KEY:
 
 Rotating the key invalidates existing tokens, which is fine — nobody is in a
 live session yet.
+
+**Note:** removing `.env` from the working tree does not remove it from history.
+Because the committed values are a local-only `DATABASE_URL` and a Moyasar
+**sandbox** key, rewriting history is not proportionate here; rotating the JWT
+secret and moving it out of the repo is. Any credential that becomes
+production-real must be issued fresh, never reused from these files.
 
 ---
 
