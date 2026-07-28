@@ -1,5 +1,6 @@
 import "./Landing.css";
 import heroImage from "../../assets/landingpage.jpg";
+import { Link } from "react-router-dom";
 function Landing() {
   return (
     <>
@@ -19,13 +20,9 @@ function Landing() {
               <a href="#team">Team</a>
             </li>
           </ul>
-          <a
-            className="ld-btn-primary"
-            href="https://portfolio-delta-murex-34.vercel.app"
-            rel="noopener noreferrer"
-          >
+          <Link className="ld-btn-primary" to="/home">
             Open Qooti →
-          </a>
+          </Link>
         </div>
       </nav>
       <header
