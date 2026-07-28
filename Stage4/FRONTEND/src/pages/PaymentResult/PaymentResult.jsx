@@ -1,9 +1,6 @@
 import "./PaymentResult.css";
 import { Link, useSearchParams } from "react-router-dom";
 import Navbar from "../../components/Navbar/Navbar";
-
-// Landing page for the Moyasar callback redirect after 3-D Secure.
-// Query params: status=success|failed|pending|error, subscription_id, message.
 function PaymentResult() {
   const [params] = useSearchParams();
   const status = params.get("status") || "error";
