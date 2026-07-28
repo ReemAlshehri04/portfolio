@@ -21,7 +21,6 @@ import MealBrowse from "./pages/MealBrowse/MealBrowse";
 import AdminDashboard from "./pages/AdminDashboard/AdminDashboard";
 import AdminCustomers from "./pages/AdminCustomers/AdminCustomers";
 import AdminOrders from "./pages/AdminOrders/AdminOrders";
-import Payment from "./pages/Payment/Payment";
 import Landing from "./pages/qooti-landing/Landing";
 
 function App() {
@@ -57,7 +56,6 @@ function App() {
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/customers" element={<AdminCustomers />} />
           <Route path="/admin/orders" element={<AdminOrders />} />
-          <Route path="/payment" element={<Payment />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
