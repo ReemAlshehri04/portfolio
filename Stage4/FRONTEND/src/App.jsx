@@ -22,19 +22,24 @@ import AdminDashboard from "./pages/AdminDashboard/AdminDashboard";
 import AdminCustomers from "./pages/AdminCustomers/AdminCustomers";
 import AdminOrders from "./pages/AdminOrders/AdminOrders";
 import Payment from "./pages/Payment/Payment";
+import Landing from "./pages/qooti-landing/Landing";
 
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Landing />} />
+          <Route path="/home" element={<Home />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/restaurant-register" element={<RestaurantRegister />} />
           <Route path="/restaurant-login" element={<RestaurantLogin />} />
           <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin/pending-restaurants" element={<AdminPendingRestaurants />} />
+          <Route
+            path="/admin/pending-restaurants"
+            element={<AdminPendingRestaurants />}
+          />
           <Route path="/weekly-selection" element={<WeeklyMealSelection />} />
           <Route path="/order-summary" element={<OrderSummary />} />
           <Route path="/payment-result" element={<PaymentResult />} />
@@ -45,12 +50,14 @@ function App() {
           <Route path="/dashboard" element={<CustomerDashboard />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/restaurants" element={<Restaurants />} />
-          <Route path="/restaurants/:restaurantId/meals" element={<MealBrowse />} />
+          <Route
+            path="/restaurants/:restaurantId/meals"
+            element={<MealBrowse />}
+          />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/customers" element={<AdminCustomers />} />
           <Route path="/admin/orders" element={<AdminOrders />} />
           <Route path="/payment" element={<Payment />} />
-        
         </Routes>
       </BrowserRouter>
     </AuthProvider>
