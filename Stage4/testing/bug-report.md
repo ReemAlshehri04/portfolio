@@ -25,7 +25,7 @@ Severity uses the labels agreed in the sprint plan:
 | BUG-02 | Weak JWT signing key, committed to the repository | Auth | Critical | **Fixed** |
 | BUG-12 | Payment page never sends the card fields — page was an unreachable orphan, removed | Frontend | Critical | **Fixed** |
 | BUG-13 | Payment page hardcodes `127.0.0.1` — same orphaned page, removed | Frontend | Critical | **Fixed** |
-| BUG-14 | 3-D Secure callback URLs unset on Railway — deployed payment cannot complete | Deployment | Critical | **Open** |
+| BUG-14 | Moyasar callback URLs undocumented — localhost fallbacks masked the gap | Deployment | Critical | **Fixed** |
 | BUG-03 | Invalid email format not rejected | Auth | Major | **Fixed** |
 | BUG-04 | Negative age / weight accepted at registration | Auth | Major | **Fixed** |
 | BUG-05 | Expired discount code returned 500 instead of 400 | Payments | Major | **Fixed** |
@@ -36,54 +36,14 @@ Severity uses the labels agreed in the sprint plan:
 | BUG-10 | Unknown `?status=` filter value silently ignored | Admin | Minor | **Open (accepted)** |
 | BUG-11 | Result docs misspelled `_reselt`, breaking README links | Docs | Minor | **Fixed** |
 
-**Totals:** 14 defects — 11 fixed, 3 open.
-The only release blocker is **BUG-14** — the deployed 3-D Secure return leg
-redirects to localhost, so no deployed payment can complete. It is a
-configuration fix, not code. The other two open items are documented decisions
-rather than outstanding work: BUG-06 is a schema change deferred by team
-agreement, and BUG-10 is an accepted contract.
+**Totals:** 14 defects — 12 fixed, 2 open.
+**No open release blockers.** Both remaining open items are documented
+decisions rather than outstanding work: BUG-06 is a schema change deferred by
+team agreement, and BUG-10 is an accepted contract.
 
 ---
 
 ## Open bugs
-
-### BUG-14 — Deployed 3-D Secure redirects the customer to `127.0.0.1`
-**Severity:** Critical · **Area:** Deployment / Payments · **Status:** Open
-
-[`payment_routes.py`](../BACKEND/routes/payment_routes.py) reads two more
-environment variables than the README documents, both with localhost fallbacks:
-
-| Variable | Fallback | Used for |
-|---|---|---|
-| `MOYASAR_CALLBACK_URL` | `http://127.0.0.1:8000/api/payments/callback` | Sent to Moyasar as the 3-D Secure return URL |
-| `FRONTEND_BASE_URL` | `http://localhost:5173` | Where the callback then redirects the browser |
-
-Neither is set in the backend `.env`, nor (as of the 2026-07-27 deploy) on
-Railway. Locally the fallbacks are exactly right, so every local run works —
-which is what makes this invisible.
-
-**Impact.** On the deployed backend, card entry and payment initiation succeed,
-then Moyasar redirects the customer's browser to `127.0.0.1` — their own
-machine. The server-to-server verification in the callback never runs, so the
-payment stays `pending` and the subscription never confirms. The deployed
-checkout is broken on its *return* leg, after the customer has entered their
-card.
-
-**Repro:** `grep -n "getenv" BACKEND/routes/payment_routes.py` → both fallbacks;
-`grep MOYASAR_CALLBACK_URL BACKEND/.env` → no match.
-
-Found by code inspection while re-verifying BUG-12/BUG-13 — the earlier
-enumeration of deployment variables missed `getenv` calls that carry defaults.
-Not caught by `smoke-check.py`, because the callback leg only exists during a
-real gateway round-trip.
-
-**Recommended fix:** set both variables on Railway —
-`MOYASAR_CALLBACK_URL=https://<backend>/api/payments/callback` and
-`FRONTEND_BASE_URL=https://<frontend>` — add both to `.env.example`, and verify
-with one sandbox-card payment against the deployed site, checked through to the
-`/payment-result` page and a `confirmed` subscription.
-
----
 
 ### BUG-06 — An unpaid subscription is already `'confirmed'`
 **Severity:** Major · **Area:** Subscriptions · **Status:** Open (design)
@@ -366,8 +326,58 @@ hit it. The live checkout goes through `authRequest`, which builds URLs from
 
 The failure mode this entry warned about — a deployed build silently talking to
 localhost — turned out to be real on the **backend** side instead: the Moyasar
-callback URLs fall back to localhost in production. That is now **BUG-14**, the
-remaining release blocker.
+callback URLs fall back to localhost and were undocumented. That is **BUG-14**.
+
+---
+
+### BUG-14 — Moyasar callback URLs undocumented; localhost fallbacks mask the gap
+**Severity:** Critical · **Area:** Deployment / Payments · **Status:** Fixed — reclassified 2026-07-28
+
+**The durable finding.** [`payment_routes.py`](../BACKEND/routes/payment_routes.py)
+reads two environment variables that appeared in no `.env`, no `.env.example`,
+and no README, both with localhost fallbacks:
+
+| Variable | Fallback | Used for |
+|---|---|---|
+| `MOYASAR_CALLBACK_URL` | `http://127.0.0.1:8000/api/payments/callback` | Sent to Moyasar as the 3-D Secure return URL |
+| `FRONTEND_BASE_URL` | `http://localhost:5173` | Where the callback then redirects the browser |
+
+The fallbacks are exactly right locally, so every local run works — which is
+what makes the gap invisible. If either variable is absent in a deployment,
+3-D Secure returns the customer to their own machine and the payment stays
+`pending` forever, with nothing in any dashboard or log to warn about it first.
+
+**Correction to the original filing.** As filed, this entry claimed the
+variables were unset on Railway and that deployed checkout was therefore broken
+on its return leg. That claim was an **inference, not an observation** — it was
+never directly checked against Railway's configuration. Both variables are in
+fact present on Railway (added by a teammate; whether before or after this
+entry was filed is not established). The deployed-impact claim is withdrawn as
+unverified; what stands is the documentation gap. Second entry in this report
+with a true code finding and an unsupported impact claim — see BUG-12 for the
+first, and the same lesson applies.
+
+**Fix, all parts verified 2026-07-28:**
+
+* Both variables documented in [`.env.example`](../BACKEND/.env.example), with
+  the deployment requirement stated explicitly.
+* Railway values verified character-for-character: the callback URL matches the
+  backend domain plus the exact route (`/api/payments` prefix + `/callback`),
+  and the frontend URL matches the deployed Vercel origin with no trailing
+  slash.
+* `FRONTEND_BASE_URL` verified **behaviorally**: an unauthenticated GET to the
+  deployed callback returns
+  `307 → https://<frontend>/payment-result?status=error&message=Missing+payment+id`
+  — the redirect leaves localhost only if the variable is set correctly.
+
+**Scope of verification — stated precisely.** The full 3-D Secure round-trip
+(Moyasar calling the deployed callback after a real card authentication) was
+**not re-run against production**; closure rests on the config verification
+above plus the complete end-to-end sandbox run performed locally on 2026-07-28
+over the identical code path (card accepted → 3-D Secure approved → callback
+verified server-to-server → subscription `confirmed` with 5 order items). A
+deployed sandbox-card payment remains the one test that would make this
+airtight; it was deliberately skipped as low-residual-risk.
 
 ---
 
@@ -449,6 +459,7 @@ Three things this establishes beyond "the service responds":
 this says nothing about whether the pages work — the same blind spot described
 above, and the reason BUG-12 survived a fully green regression suite. The
 deployment is verified as *reachable and correctly configured*, not as
-*usable end to end*. The deployed checkout's return leg in particular is
-known-broken until BUG-14 is resolved, and no sandbox-card payment has yet
-been run against the deployed site.
+*usable end to end*. The deployed checkout's return-leg configuration is now
+verified (see BUG-14), but no sandbox-card payment has been run against the
+deployed site — the local end-to-end run of 2026-07-28 is the closest
+evidence for the full loop.

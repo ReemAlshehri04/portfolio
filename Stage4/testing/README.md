@@ -86,6 +86,6 @@ check fails.
 
 - [`bug-report.md`](bug-report.md) — the Sprint 4 final bug report: all 14
   defects found across Sprints 1–4 with severity and fixed/open status.
-  **BUG-14 (Moyasar callback URLs unset on the deployed backend) is the one
-  remaining release blocker.**
+  **All Critical findings are closed; the two remaining open items (BUG-06,
+  BUG-10) are documented decisions, not release blockers.**
 - `screenshots/` — Postman evidence from the early manual runs.
