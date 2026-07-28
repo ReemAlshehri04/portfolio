@@ -121,7 +121,7 @@ function WeeklyMealSelection() {
 
   const handleReviewOrder = () => {
     if (!allSelected) return;
-    navigate("/order-summary", {
+    navigate("/checkout", {
       state: {
         startDate: days[0].iso,
         endDate: days[days.length - 1].iso,

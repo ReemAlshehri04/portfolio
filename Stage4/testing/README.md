@@ -84,8 +84,8 @@ check fails.
 
 ## Bug report
 
-- [`bug-report.md`](bug-report.md) — the Sprint 4 final bug report: all 13
+- [`bug-report.md`](bug-report.md) — the Sprint 4 final bug report: all 14
   defects found across Sprints 1–4 with severity and fixed/open status.
-  **BUG-02 (`SECRET_KEY` unset), BUG-12, and BUG-13 (payment page issues) must
-  be fixed before the production deploy.**
+  **All Critical findings are closed; the two remaining open items (BUG-06,
+  BUG-10) are documented decisions, not release blockers.**
 - `screenshots/` — Postman evidence from the early manual runs.

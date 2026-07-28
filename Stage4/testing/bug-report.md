@@ -1,7 +1,7 @@
 # Final Bug Report — Qooti Healthy Meals Platform
 
 **Sprint 4 deliverable — QA Lead**
-**Compiled:** 2026-07-25 · **Open items re-verified:** 2026-07-27
+**Compiled:** 2026-07-25 · **Open items re-verified:** 2026-07-27 and 2026-07-28
 **Scope:** every defect found across Sprints 1–4, in the application and in the
 test tooling itself.
 **Sources:** manual Postman runs (Sprints 1–2), the three automated suites in this
@@ -23,8 +23,9 @@ Severity uses the labels agreed in the sprint plan:
 |---|---|---|---|---|
 | BUG-01 | Empty password accepted by request validation | Auth | Critical | **Fixed** |
 | BUG-02 | Weak JWT signing key, committed to the repository | Auth | Critical | **Fixed** |
-| BUG-12 | Payment page never sends the card fields — checkout always 422s | Frontend | Critical | **Open** |
-| BUG-13 | Payment page hardcodes `127.0.0.1`, bypassing `VITE_API_BASE_URL` | Frontend | Critical | **Open** |
+| BUG-12 | Payment page never sends the card fields — page was an unreachable orphan, removed | Frontend | Critical | **Fixed** |
+| BUG-13 | Payment page hardcodes `127.0.0.1` — same orphaned page, removed | Frontend | Critical | **Fixed** |
+| BUG-14 | Moyasar callback URLs undocumented — localhost fallbacks masked the gap | Deployment | Critical | **Fixed** |
 | BUG-03 | Invalid email format not rejected | Auth | Major | **Fixed** |
 | BUG-04 | Negative age / weight accepted at registration | Auth | Major | **Fixed** |
 | BUG-05 | Expired discount code returned 500 instead of 400 | Payments | Major | **Fixed** |
@@ -35,84 +36,14 @@ Severity uses the labels agreed in the sprint plan:
 | BUG-10 | Unknown `?status=` filter value silently ignored | Admin | Minor | **Open (accepted)** |
 | BUG-11 | Result docs misspelled `_reselt`, breaking README links | Docs | Minor | **Fixed** |
 
-**Totals:** 13 defects — 9 fixed, 4 open.
-Of the open items, **BUG-12 and BUG-13 must both be fixed before release.**
-BUG-12 means no customer can currently pay through the UI. The remaining two
-open items are documented decisions rather than outstanding work: BUG-06 is a
-schema change deferred by team agreement, and BUG-10 is an accepted contract.
+**Totals:** 14 defects — 12 fixed, 2 open.
+**No open release blockers.** Both remaining open items are documented
+decisions rather than outstanding work: BUG-06 is a schema change deferred by
+team agreement, and BUG-10 is an accepted contract.
 
 ---
 
 ## Open bugs
-
-### BUG-12 — The payment page never sends the card fields; checkout always fails
-**Severity:** Critical · **Area:** Frontend · **Status:** Open
-
-[`Payment.jsx`](../FRONTEND/src/pages/Payment/Payment.jsx) collects
-`cardholderName`, `cardNumber`, `expiryDate`, and `cvv` into component state and
-marks all four inputs `required` — then never puts them in the request. The body
-sent at line 38 is:
-
-```js
-body: JSON.stringify({
-  subscription_id: orderData.subscriptionId,
-  amount: orderData.totalPrice || 249,
-}),
-```
-
-`PaymentProcessRequest` requires `card_number`, `card_expiry_month`,
-`card_expiry_year`, `card_cvc`, and `card_holder_name`. None are sent.
-
-**Impact.** Every checkout attempt fails validation. No customer can complete a
-payment through the UI at all — the single most important flow in the product.
-
-**Repro** (verified 2026-07-25 against the running server): send the exact body
-above with a valid client token to `POST /api/payments` →
-
-```
-HTTP 422 — "card_number: Field required", "card_expiry_month: Field required",
-"card_expiry_year: Field required", "card_cvc: Field required",
-"card_holder_name: Field required"
-```
-
-**Why the automated suites did not catch this.** All 109 cases construct the API
-payload themselves, so they prove the *backend* accepts a correct request.
-`CPAY1` passes while the real page 422s. **No suite in this directory exercises
-the frontend** — that gap is the actual finding here, and it applies to every
-page, not just this one.
-
-**Recommended fix:** map the form state to the API's field names and expand
-`expiryDate` ("MM / YY") into `card_expiry_month` and `card_expiry_year`. Drop
-the `amount` field while there — see the note below.
-
-**Not a vulnerability:** the client-supplied `amount` is *not* a price-tampering
-hole. `PaymentProcessRequest` has no `amount` field, so Pydantic discards it, and
-[`payment_routes.py`](../BACKEND/routes/payment_routes.py) charges
-`payment["amount"]` read from the database. The field is dead weight, and its
-`|| 249` fallback disagrees with the real SAR 250 price, but it cannot affect
-what a customer is charged.
-
----
-
-### BUG-13 — The payment page hardcodes `127.0.0.1`, bypassing the API base URL
-**Severity:** Critical · **Area:** Frontend · **Status:** Open
-
-[`Payment.jsx`](../FRONTEND/src/pages/Payment/Payment.jsx) line 32 calls
-`fetch("http://127.0.0.1:8000/api/payments", …)` directly. Four of the six
-`fetch` call sites in the frontend correctly use
-`import.meta.env.VITE_API_BASE_URL`; this one does not.
-
-**Impact.** In any deployed build this requests `127.0.0.1` — the *visitor's own
-machine* — so it fails for every user regardless of BUG-12. It works in
-development only because the backend happens to be on that address locally.
-
-**Repro:** `grep -rn "127.0.0.1:8000" FRONTEND/src/` → one hit, in `Payment.jsx`.
-
-**Recommended fix:** route it through the same `VITE_API_BASE_URL` the rest of
-the app uses, and set that variable to the deployed backend URL in the Vercel
-project settings — `FRONTEND/.env` currently pins it to `http://localhost:8000`.
-
----
 
 ### BUG-06 — An unpaid subscription is already `'confirmed'`
 **Severity:** Major · **Area:** Subscriptions · **Status:** Open (design)
@@ -348,6 +279,108 @@ reference in the `test-admin-flow.py` docstring.
 
 ---
 
+### BUG-12 — The payment page never sends the card fields; checkout always fails
+**Severity:** Critical · **Area:** Frontend · **Status:** Closed 2026-07-28 — orphaned page removed
+
+The defect was real; the impact claim was not. `Payment.jsx` did collect the
+card fields and post only `subscription_id` + `amount`, and the 422 repro from
+2026-07-25 was accurate. **Re-verification on 2026-07-28 found the page
+unreachable**: nothing in the frontend navigated or linked to `/payment` — the
+only reference was the route definition. The page was an orphan from an early
+commit (`b232a81`, "Add Payment page"), superseded when checkout was built into
+the order-summary page and never deleted.
+
+The reachable flow (weekly selection → checkout) has sent the correct five-field
+contract through the shared `authRequest` helper since at least `3ac3a03`
+(2026-07-18) — a week before this report was compiled. *"No customer can
+complete a payment through the UI"* was therefore **false when written**: the
+broken request lived on a page no journey reached. Nor was the orphan fixable —
+reached directly it has no subscription in its navigation state, so it could
+only ever 422, over mock data and a "powered by Stripe" label naming the wrong
+gateway.
+
+**Fix:** the page was deleted rather than repaired — component, stylesheet,
+route, and import — and the working page was renamed `OrderSummary` →
+[`Checkout`](../FRONTEND/src/pages/Checkout/Checkout.jsx) (route `/checkout`) so
+the file that takes the payment says so. Verified: no stale references, and
+`vite build` passes.
+
+**The original lesson stands, sharpened.** This entry blamed the API-only
+suites: 109 green cases while checkout was "broken", because no suite drives the
+frontend. Re-verification shows that gap cut both ways — the suites could not
+show the page was broken, and inspection without the browser could not show the
+page was unreachable. The report itself reviewed an orphaned file as if it were
+the live flow. Both errors have the same fix: browser-level coverage of the
+real journeys.
+
+---
+
+### BUG-13 — The payment page hardcodes `127.0.0.1`, bypassing the API base URL
+**Severity:** Critical · **Area:** Frontend · **Status:** Closed 2026-07-28 — orphaned page removed
+
+The hardcoded `fetch("http://127.0.0.1:8000/api/payments", …)` was real, but it
+was in the same unreachable `Payment.jsx` as BUG-12, so no deployed user ever
+hit it. The live checkout goes through `authRequest`, which builds URLs from
+`VITE_API_BASE_URL` like the rest of the app. Closed by the same deletion;
+`grep -rn "127.0.0.1:8000" FRONTEND/src/` now returns nothing.
+
+The failure mode this entry warned about — a deployed build silently talking to
+localhost — turned out to be real on the **backend** side instead: the Moyasar
+callback URLs fall back to localhost and were undocumented. That is **BUG-14**.
+
+---
+
+### BUG-14 — Moyasar callback URLs undocumented; localhost fallbacks mask the gap
+**Severity:** Critical · **Area:** Deployment / Payments · **Status:** Fixed — reclassified 2026-07-28
+
+**The durable finding.** [`payment_routes.py`](../BACKEND/routes/payment_routes.py)
+reads two environment variables that appeared in no `.env`, no `.env.example`,
+and no README, both with localhost fallbacks:
+
+| Variable | Fallback | Used for |
+|---|---|---|
+| `MOYASAR_CALLBACK_URL` | `http://127.0.0.1:8000/api/payments/callback` | Sent to Moyasar as the 3-D Secure return URL |
+| `FRONTEND_BASE_URL` | `http://localhost:5173` | Where the callback then redirects the browser |
+
+The fallbacks are exactly right locally, so every local run works — which is
+what makes the gap invisible. If either variable is absent in a deployment,
+3-D Secure returns the customer to their own machine and the payment stays
+`pending` forever, with nothing in any dashboard or log to warn about it first.
+
+**Correction to the original filing.** As filed, this entry claimed the
+variables were unset on Railway and that deployed checkout was therefore broken
+on its return leg. That claim was an **inference, not an observation** — it was
+never directly checked against Railway's configuration. Both variables are in
+fact present on Railway (added by a teammate; whether before or after this
+entry was filed is not established). The deployed-impact claim is withdrawn as
+unverified; what stands is the documentation gap. Second entry in this report
+with a true code finding and an unsupported impact claim — see BUG-12 for the
+first, and the same lesson applies.
+
+**Fix, all parts verified 2026-07-28:**
+
+* Both variables documented in [`.env.example`](../BACKEND/.env.example), with
+  the deployment requirement stated explicitly.
+* Railway values verified character-for-character: the callback URL matches the
+  backend domain plus the exact route (`/api/payments` prefix + `/callback`),
+  and the frontend URL matches the deployed Vercel origin with no trailing
+  slash.
+* `FRONTEND_BASE_URL` verified **behaviorally**: an unauthenticated GET to the
+  deployed callback returns
+  `307 → https://<frontend>/payment-result?status=error&message=Missing+payment+id`
+  — the redirect leaves localhost only if the variable is set correctly.
+
+**Scope of verification — stated precisely.** The full 3-D Secure round-trip
+(Moyasar calling the deployed callback after a real card authentication) was
+**not re-run against production**; closure rests on the config verification
+above plus the complete end-to-end sandbox run performed locally on 2026-07-28
+over the identical code path (card accepted → 3-D Secure approved → callback
+verified server-to-server → subscription `confirmed` with 5 order items). A
+deployed sandbox-card payment remains the one test that would make this
+airtight; it was deliberately skipped as low-residual-risk.
+
+---
+
 ## Deviations from the sprint plan — not defects
 
 Recorded for the final review so they are not mistaken for bugs later.
@@ -384,9 +417,10 @@ passing vacuously.
 
 **Not yet covered:** `PUT /api/users/me`, and — more importantly — **the frontend.
 Every case here talks to the API directly**, so a green run says nothing about
-whether the pages actually work. BUG-12 is exactly that gap made concrete: the
-customer-flow suite passes while real checkout is broken. Browser-level coverage
-of the three journeys is the obvious next investment.
+whether the pages actually work. BUG-12 made that gap concrete twice over: the
+suites could not show the orphaned payment page was broken, and code inspection
+without a browser could not show the page was unreachable. Browser-level
+coverage of the three journeys is the obvious next investment.
 
 **Production verification.** The three suites can now be aimed at another
 environment via `QOOTI_BASE_URL` / `QOOTI_DATABASE_URL`, but they write to
@@ -425,4 +459,7 @@ Three things this establishes beyond "the service responds":
 this says nothing about whether the pages work — the same blind spot described
 above, and the reason BUG-12 survived a fully green regression suite. The
 deployment is verified as *reachable and correctly configured*, not as
-*usable end to end*. Checkout in particular is still broken in the browser.
+*usable end to end*. The deployed checkout's return-leg configuration is now
+verified (see BUG-14), but no sandbox-card payment has been run against the
+deployed site — the local end-to-end run of 2026-07-28 is the closest
+evidence for the full loop.
