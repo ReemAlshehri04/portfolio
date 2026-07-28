@@ -1,7 +1,7 @@
 # Final Bug Report — Qooti Healthy Meals Platform
 
 **Sprint 4 deliverable — QA Lead**
-**Compiled:** 2026-07-25
+**Compiled:** 2026-07-25 · **Open items re-verified:** 2026-07-27
 **Scope:** every defect found across Sprints 1–4, in the application and in the
 test tooling itself.
 **Sources:** manual Postman runs (Sprints 1–2), the three automated suites in this
@@ -22,7 +22,7 @@ Severity uses the labels agreed in the sprint plan:
 | ID | Title | Area | Severity | Status |
 |---|---|---|---|---|
 | BUG-01 | Empty password accepted by request validation | Auth | Critical | **Fixed** |
-| BUG-02 | `SECRET_KEY` unset — JWTs signed with an unconfigured key | Auth | Critical | **Open** |
+| BUG-02 | Weak JWT signing key, committed to the repository | Auth | Critical | **Fixed** |
 | BUG-12 | Payment page never sends the card fields — checkout always 422s | Frontend | Critical | **Open** |
 | BUG-13 | Payment page hardcodes `127.0.0.1`, bypassing `VITE_API_BASE_URL` | Frontend | Critical | **Open** |
 | BUG-03 | Invalid email format not rejected | Auth | Major | **Fixed** |
@@ -35,9 +35,11 @@ Severity uses the labels agreed in the sprint plan:
 | BUG-10 | Unknown `?status=` filter value silently ignored | Admin | Minor | **Open (accepted)** |
 | BUG-11 | Result docs misspelled `_reselt`, breaking README links | Docs | Minor | **Fixed** |
 
-**Totals:** 13 defects — 8 fixed, 5 open.
-Of the open items, **BUG-02, BUG-12, and BUG-13 must all be fixed before the
-production deploy.** BUG-12 in particular means no customer can currently pay.
+**Totals:** 13 defects — 9 fixed, 4 open.
+Of the open items, **BUG-12 and BUG-13 must both be fixed before release.**
+BUG-12 means no customer can currently pay through the UI. The remaining two
+open items are documented decisions rather than outstanding work: BUG-06 is a
+schema change deferred by team agreement, and BUG-10 is an accepted contract.
 
 ---
 
@@ -109,52 +111,6 @@ development only because the backend happens to be on that address locally.
 **Recommended fix:** route it through the same `VITE_API_BASE_URL` the rest of
 the app uses, and set that variable to the deployed backend URL in the Vercel
 project settings — `FRONTEND/.env` currently pins it to `http://localhost:8000`.
-
----
-
-### BUG-02 — `SECRET_KEY` is unset; JWTs are signed with an unconfigured key
-**Severity:** Critical · **Area:** Authentication · **Status:** Open
-
-[`auth.py`](../BACKEND/auth.py) reads `SECRET_KEY` from the environment and uses it
-to sign every access token:
-
-```python
-SECRET_KEY = os.getenv("SECRET_KEY")
-ALGORITHM = "HS256"
-```
-
-`SECRET_KEY` is defined **neither in the backend `.env`** (which sets only
-`DATABASE_URL`, `MOYASAR_SECRET_KEY`, and `FRONTEND_URL`) **nor in the shell
-environment**. `os.getenv` therefore returns `None`, yet login still issues
-tokens — so signing is proceeding with an unconfigured key rather than failing
-loudly.
-
-**Impact.** The security of every session depends on an attacker not being able
-to guess the signing key. An unset key is not a secret. If it is guessable, a
-forged token naming any `user_id`/`user_type` would be accepted by
-`get_current_user`, which would defeat every role check in the system —
-including the admin-only routes.
-
-**Repro:** `grep SECRET_KEY BACKEND/.env` → no match; `env | grep SECRET_KEY` → no
-match; log in and observe that a token is still returned.
-
-**Honest caveat:** this was found by code and configuration inspection. I did
-**not** attempt to forge a token to prove exploitability, so the severity is
-based on the missing control, not on a demonstrated bypass. It should be treated
-as Critical until the key is configured, at which point the question is moot.
-
-**Recommended fix:** generate a strong random secret, set it in the backend
-`.env` and in the production environment (Render/Railway config vars), and make
-`auth.py` fail fast at import if it is missing:
-
-```python
-SECRET_KEY = os.getenv("SECRET_KEY")
-if not SECRET_KEY:
-    raise RuntimeError("SECRET_KEY is not configured")
-```
-
-Rotating the key invalidates existing tokens, which is fine — nobody is in a
-live session yet.
 
 ---
 
@@ -231,6 +187,61 @@ profile and an empty password would have had an account created with no password
 
 **Verified 2026-07-25:** empty and short passwords → **422**, no row created.
 Regression-locked by `REG7` in [`test-customer-flow.py`](test-customer-flow.py).
+
+---
+
+### BUG-02 — Weak JWT signing key, committed to the repository
+**Severity:** Critical · **Area:** Authentication · **Status:** Fixed — verified 2026-07-27
+
+This entry was filed twice over. Originally: *"`SECRET_KEY` is unset — JWTs
+signed with an unconfigured key."* On re-verification the key had been added but
+was `qooti_secret_key` — the project name plus the words "secret key", 16
+characters, no randomness — and `Stage4/BACKEND/.env` was **tracked in git**, so
+the signing key was readable by anyone with repository access. HS256 is
+symmetric, so either weakness alone would let an attacker forge a token naming
+any `user_id`/`user_type` and defeat every role check, including `verify_admin`.
+
+**Fix — four parts, all verified:**
+
+| Part | Result |
+|---|---|
+| Key regenerated | 86-char `secrets.token_urlsafe(64)` value, local and Railway issued separately |
+| `.env` untracked | `git rm --cached` on both files in `0ba58da`; they remain on disk |
+| Ignored going forward | Two `.gitignore` files consolidated to one at the root that ignores `.env`/`.env.*` while allowing `.env.example`; templates added for backend and frontend |
+| Fail-fast guard | [`auth.py`](../BACKEND/auth.py) now raises at import if the key is absent |
+
+```python
+SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+    raise RuntimeError("SECRET_KEY is not configured")
+```
+
+The guard was tested both directions: import succeeds with the key set, and
+raises `RuntimeError: SECRET_KEY is not configured` without it. This matters
+more than it looks — before it existed, a misspelled variable in the deployment
+config would let the service boot and fail confusingly at first login instead of
+failing the deploy.
+
+**Verified against the deployed environment 2026-07-27.**
+[`smoke-check.py`](smoke-check.py) against the Railway backend: `USR1` login
+returned a token, `USR2` used it to open `/api/users/me`, `USR3` confirmed the
+returned profile matched the account that logged in. Signing and verification
+therefore round-trip with a real key in production. `SEC2` and `SEC3` confirm
+that a missing or malformed token is still rejected with 401.
+
+**Scope of that evidence — stated precisely.** The round-trip proves the
+deployed key works; it does not prove it is the specific value generated for
+that environment, since any valid secret would pass identically. Confirming the
+exact value requires reading it back from the host's config vars. `SEC3` sends a
+malformed token, so it exercises token parsing, not signature verification —
+it is not evidence about the key.
+
+**Residual risk, accepted:** `qooti_secret_key` remains recoverable from git
+history (commits `38841e5` through `0ba58da`). This is deliberate and safe —
+the key was rotated, so the value in history signs nothing. The other committed
+values were a `localhost` `DATABASE_URL` and a Moyasar **sandbox** key, so
+rewriting history was judged disproportionate. Any credential that becomes
+production-real must be issued fresh, never reused from those files.
 
 ---
 
@@ -384,6 +395,34 @@ and deleting the QA customer's data — so a non-localhost target requires an
 explicit `QOOTI_ALLOW_REMOTE=1`, and they belong against staging rather than
 production. For the live environment use [`smoke-check.py`](smoke-check.py): 17
 read-only checks over health, public browsing, and auth enforcement, with no
-database connection and no third-party dependencies. It has not yet been run
-against a deployed URL, because nothing is deployed yet — that is the last step
-of the Sprint 4 checklist.
+database connection and no third-party dependencies.
+
+**Run against the deployed environment, 2026-07-27 — 17 passed, 0 failed, 0
+skipped.** Backend on Railway, frontend origin on Vercel.
+
+| Group | Cases | Result |
+|---|---|---|
+| Service is up | 2 | passed — `/health` 200, API version 1.0.0 |
+| Public browsing | 5 | passed — 4 approved restaurants, full nutrition on every card, clean 404 for an unknown restaurant |
+| Auth enforcement | 6 | passed — missing, malformed, and non-existent-account requests all 401; no internals leaked in the error body |
+| CORS | 1 | passed — preflight echoes the deployed frontend origin exactly, not a wildcard |
+| Authenticated round-trip | 3 | passed — login issued a token, the token opened `/api/users/me`, the profile matched the account |
+
+Three things this establishes beyond "the service responds":
+
+* **The deployed signing key works.** The authenticated round-trip is the
+  evidence behind closing BUG-02 — a token was issued and then verified by the
+  same key in the live environment.
+* **`FRONTEND_URL` is configured correctly.** The preflight returns the exact
+  Vercel origin. This is the failure mode that no terminal-based check would
+  otherwise catch: a wrong value leaves the backend looking perfectly healthy
+  over curl while every request from the real frontend is blocked by the
+  browser.
+* **The database was provisioned from the current schema.** This is the first
+  environment built without the discarded `review` table.
+
+**What a green run here still does not cover.** Every check is an API call, so
+this says nothing about whether the pages work — the same blind spot described
+above, and the reason BUG-12 survived a fully green regression suite. The
+deployment is verified as *reachable and correctly configured*, not as
+*usable end to end*. Checkout in particular is still broken in the browser.
