@@ -56,7 +56,7 @@ function Restaurants() {
               {user?.user_type !== "restaurant" && (
                 <>
                   <Link to={user ? "/dashboard" : "/restaurants"}>Meal Plans</Link>
-                  <Link to="/#how-it-works">How it Works</Link>
+                
                 </>
               )}
               <Link to="/restaurants" className="active">Partners</Link>
