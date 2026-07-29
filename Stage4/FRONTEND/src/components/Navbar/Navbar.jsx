@@ -21,9 +21,11 @@ function Navbar({transparent = false}) {
 
       <ul className="nav-links">
         <li>
-          <Link to="/">Home</Link>
+          <Link to="/home">Home</Link>
         </li>
-
+        <li>
+          <a href="#how-it-works">How It Works</a>
+        </li>
         {user?.user_type !== "restaurant" && (
           <>
             <li>
