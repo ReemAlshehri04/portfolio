@@ -24,17 +24,10 @@ function Navbar({transparent = false}) {
           <Link to="/">Home</Link>
         </li>
 
-        <li>
-          <a href="#how-it-works">How It Works</a>
-        </li>
-
         {user?.user_type !== "restaurant" && (
           <>
             <li>
               <Link to="/restaurants">Restaurants</Link>
-            </li>
-            <li>
-              <Link to="/restaurants">Meal Plans</Link>
             </li>
           </>
         )}
