@@ -473,6 +473,16 @@ have them. The deliberately invalid fixtures (`INACTIVE10`, `EXPIRED10`)
 were **not** added — they exist to prove rejection paths and belong to the QA
 suites that assert on them, not to a demo environment.
 
+**Verified in production 2026-07-29**, after applying the block to the Railway
+database, by calling the deployed API directly:
+
+| Request | Result |
+|---|---|
+| `SAVE10` | **200** — `discount_code_id: 1`, `10.00` |
+| `save10` (lower-case) | **200** — resolves to `SAVE10`; the `UPPER(code)` lookup works |
+| `SAVE25` | **200** — `25.00` |
+| `NOTREAL` | **404** — the rejection path still behaves; the fix did not make validation permissive |
+
 **Operational note.** Re-deploying does not re-run `seed.sql`, so an existing
 deployed database needs the block applied once by hand:
 
@@ -553,8 +563,18 @@ Three things this establishes beyond "the service responds":
   otherwise catch: a wrong value leaves the backend looking perfectly healthy
   over curl while every request from the real frontend is blocked by the
   browser.
-* **The database was provisioned from the current schema.** This is the first
-  environment built without the discarded `review` table.
+* **The deployed database predates the current schema — corrected 2026-07-29.**
+  An earlier draft of this section claimed the Railway database had been
+  provisioned from the current `schema.sql`, "the first environment built
+  without the discarded `review` table." That was inferred from the seeded data
+  looking correct and was **never verified**. Inspecting the deployed database
+  shows the vestigial `review` table is still present: the database was created
+  before the reviews cleanup landed and has not been rebuilt since. Harmless —
+  the table is empty and referenced by nothing — but it is a concrete instance
+  of the pattern behind BUG-15: **an existing deployed database never picks up
+  changes to `schema.sql` or `seed.sql`.** Those files describe how a *new*
+  database is built; every deployed one drifts from them until it is explicitly
+  migrated or rebuilt.
 
 **What a green run here still does not cover.** Every check is an API call, so
 this says nothing about whether the pages work — the same blind spot described
