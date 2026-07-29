@@ -34,9 +34,10 @@ Severity uses the labels agreed in the sprint plan:
 | BUG-08 | QA admin fixtures used an invalid email domain | Test tooling | Major | **Fixed** |
 | BUG-09 | Restaurant fixture missing `restaurant_name`, failing silently | Test tooling | Major | **Fixed** |
 | BUG-10 | Unknown `?status=` filter value silently ignored | Admin | Minor | **Fixed** |
+| BUG-15 | No discount codes seeded — every code 404s in production | Payments | Major | **Fixed** |
 | BUG-11 | Result docs misspelled `_reselt`, breaking README links | Docs | Minor | **Fixed** |
 
-**Totals:** 14 defects — 13 fixed, 1 open.
+**Totals:** 15 defects — 14 fixed, 1 open.
 **No open release blockers.** The single remaining open item, BUG-06, is a
 documented design decision — a schema change deferred by team agreement, fully
 scoped and scheduled as post-submission work.
@@ -425,6 +426,59 @@ that carries the money.)
 
 This supersedes the earlier position that a deployed sandbox payment had been
 skipped as low-residual-risk. The deployed loop is now verified end to end.
+
+---
+
+### BUG-15 — No discount codes are seeded; every code 404s in production
+**Severity:** Major · **Area:** Payments / Seed data · **Status:** Fixed 2026-07-29
+
+Found during manual verification of the deployed site: applying `SAVE10` at
+checkout failed. It is not a code-path defect — **[`seed.sql`](../BACKEND/seed.sql)
+contained no `INSERT INTO discount_code` at all**, so the deployed
+`discount_code` table was empty and *every* code returned 404, not just this one.
+
+**Repro** (against the deployed backend, before the fix):
+
+```
+POST /api/discount-codes/validate  {"code":"SAVE10"}
+→ HTTP 404  {"detail":"Discount code does not exist."}
+```
+
+**Impact.** "Apply a discount code" is a **Should Have** user story in the Stage
+3 documentation and was 100% non-functional in production. Not Critical —
+checkout still completes at full price, so no customer is blocked from paying —
+but the checkout page advertises the code in its own input placeholder
+(`placeholder="e.g. SAVE10"` in
+[`Checkout.jsx`](../FRONTEND/src/pages/Checkout/Checkout.jsx)), so the UI
+actively invites the customer to enter a value that cannot work.
+
+**Why every local environment looked healthy.** `SAVE10`, `SAVE25`,
+`INACTIVE10` and `EXPIRED10` exist in developer databases because
+[`test-customer-flow.py`](test-customer-flow.py) **inserts them as runtime
+fixtures**. Anyone who had run the QA suite had a working `SAVE10`; anyone who
+had only loaded the seed did not. A textbook "works on my machine" divergence,
+and the reason this survived to production.
+
+**Why the regression suite could not catch it.** The suite creates the fixture
+and then asserts the endpoint validates it — proving the *code path* is
+correct while never checking that the *seed* supplies what the *UI advertises*.
+Structurally the same blind spot as BUG-12: the suite constructs its own world
+and then verifies that world. Third instance in this report of a defect that
+sat outside what the tests could see.
+
+**Fix:** a `DISCOUNT CODES` block added to `seed.sql` inserting the two working
+promotional codes (`SAVE10` 10%, `SAVE25` 25%), guarded by
+`ON CONFLICT (code) DO NOTHING` so it is safe against databases that already
+have them. The deliberately invalid fixtures (`INACTIVE10`, `EXPIRED10`)
+were **not** added — they exist to prove rejection paths and belong to the QA
+suites that assert on them, not to a demo environment.
+
+**Operational note.** Re-deploying does not re-run `seed.sql`, so an existing
+deployed database needs the block applied once by hand:
+
+```bash
+psql "$RAILWAY_PUBLIC_DATABASE_URL" -c "INSERT INTO discount_code (code, discount_percentage, is_active, expires_at) VALUES ('SAVE10', 10.00, TRUE, NULL), ('SAVE25', 25.00, TRUE, NULL) ON CONFLICT (code) DO NOTHING;"
+```
 
 ---
 

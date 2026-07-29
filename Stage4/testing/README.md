@@ -84,7 +84,7 @@ check fails.
 
 ## Bug report
 
-- [`bug-report.md`](bug-report.md) — the Sprint 4 final bug report: all 14
+- [`bug-report.md`](bug-report.md) — the Sprint 4 final bug report: all 15
   defects found across Sprints 1–4 with severity and fixed/open status.
   **All Critical findings are closed; the one remaining open item (BUG-06) is
   a documented design decision, not a release blocker.**
