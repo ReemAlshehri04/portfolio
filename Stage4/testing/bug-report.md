@@ -33,13 +33,14 @@ Severity uses the labels agreed in the sprint plan:
 | BUG-07 | Test suites pointed at the pre-flatten backend path | Test tooling | Major | **Fixed** |
 | BUG-08 | QA admin fixtures used an invalid email domain | Test tooling | Major | **Fixed** |
 | BUG-09 | Restaurant fixture missing `restaurant_name`, failing silently | Test tooling | Major | **Fixed** |
-| BUG-10 | Unknown `?status=` filter value silently ignored | Admin | Minor | **Open (accepted)** |
+| BUG-10 | Unknown `?status=` filter value silently ignored | Admin | Minor | **Fixed** |
+| BUG-15 | No discount codes seeded — every code 404s in production | Payments | Major | **Fixed** |
 | BUG-11 | Result docs misspelled `_reselt`, breaking README links | Docs | Minor | **Fixed** |
 
-**Totals:** 14 defects — 12 fixed, 2 open.
-**No open release blockers.** Both remaining open items are documented
-decisions rather than outstanding work: BUG-06 is a schema change deferred by
-team agreement, and BUG-10 is an accepted contract.
+**Totals:** 15 defects — 14 fixed, 1 open.
+**No open release blockers.** The single remaining open item, BUG-06, is a
+documented design decision — a schema change deferred by team agreement, fully
+scoped and scheduled as post-submission work.
 
 ---
 
@@ -83,23 +84,30 @@ for existing rows, which is why it is flagged rather than fixed inside Sprint 4 
 it needs the whole team's agreement, and every consumer of `status` has to be
 re-checked.
 
----
+**Deferral re-affirmed 2026-07-28, two days before submission.** The fix was
+fully scoped with the intent of shipping it, and the scoping itself is what
+confirmed the deferral. Two findings from that work are recorded here so they
+are not lost:
 
-### BUG-10 — Unknown `?status=` filter value is silently ignored
-**Severity:** Minor · **Area:** Admin · **Status:** Open (accepted contract)
+* **The impact is sharper than originally stated.** The restaurant orders view
+  ([`meal_routes.py`](../BACKEND/routes/meal_routes.py), `get_restaurant_orders`)
+  joins `subscription` with no payment filter, so an abandoned checkout puts
+  real-looking order rows — customer name, phone, delivery address — in front
+  of a restaurant that will never be paid for them. The admin overview's
+  `total_orders` counts them too.
+* **The fix is atomic across ownership boundaries.** The schema change breaks
+  every checkout unless the meal-selection gate (`meal_routes.py`, which
+  requires `status == 'confirmed'` *before* payment happens) changes in the
+  same deployment — and that file belongs to another owner. Add a production
+  data migration whose backfill retroactively reclassifies subscriptions
+  restaurants have already seen, and the change is the highest-risk category
+  possible this close to the deadline: cross-owner, atomic, and data-rewriting.
 
-`GET /api/admin/restaurants?status=banana` returns **200 with the full
-unfiltered list** instead of rejecting the value. A typo in a filter therefore
-looks like a successful query, silently showing rejected and pending restaurants
-where the caller expected a subset.
-
-**Covered by:** `AR5` in [`test-admin-flow.py`](test-admin-flow.py), which asserts
-the current behaviour as the documented contract.
-
-**Recommendation:** return 422 for values outside
-`pending|approved|rejected`. Left open by agreement — it is low priority, the
-frontend only ever sends valid values, and changing it now would break `AR5` and
-any client relying on the loose behaviour.
+The scoped fix (enum value + default + idempotent migration + one-line gate
+change + orders filter + `CPAY5`/`OV2` test updates) is estimated at half a day
+including a full regression run, and is ready to be scheduled as post-submission
+work. The site functions correctly today because the checkout flow proceeds to
+payment immediately and `payment.payment_status` carries the true signal.
 
 ---
 
@@ -268,6 +276,28 @@ itself at its source.
 
 ---
 
+### BUG-10 — Unknown `?status=` filter value was silently ignored
+**Severity:** Minor · **Area:** Admin · **Status:** Fixed 2026-07-28
+
+`GET /api/admin/restaurants?status=banana` returned **200 with the full
+unfiltered list** instead of rejecting the value, so a typo in a filter looked
+like a successful query. Originally left open as an accepted contract.
+
+**Fix:** [`admin_routes.py`](../BACKEND/routes/admin_routes.py) validates the
+parameter before querying — any value outside `pending|approved|rejected`
+(case-insensitive) → **422** naming the allowed values.
+
+**Why this was safe to change this late, unlike BUG-06:** the change is
+single-owner end to end — the route is admin code, and the only consumer of the
+loose behaviour was `AR5` in the QA suite itself, inverted in the same change.
+The frontend only ever sends valid values, so no deployed behaviour changes for
+any real user.
+
+**Verified 2026-07-28:** `AR5` now asserts the 422 and passes; full regression
+green — 109/109 across the three suites (45 customer, 39 restaurant, 25 admin).
+
+---
+
 ### BUG-11 — Result docs misspelled `_reselt`, breaking README links
 **Severity:** Minor · **Area:** Documentation · **Status:** Fixed in `9754304`
 
@@ -370,14 +400,95 @@ first, and the same lesson applies.
   `307 → https://<frontend>/payment-result?status=error&message=Missing+payment+id`
   — the redirect leaves localhost only if the variable is set correctly.
 
-**Scope of verification — stated precisely.** The full 3-D Secure round-trip
-(Moyasar calling the deployed callback after a real card authentication) was
-**not re-run against production**; closure rests on the config verification
-above plus the complete end-to-end sandbox run performed locally on 2026-07-28
-over the identical code path (card accepted → 3-D Secure approved → callback
-verified server-to-server → subscription `confirmed` with 5 order items). A
-deployed sandbox-card payment remains the one test that would make this
-airtight; it was deliberately skipped as low-residual-risk.
+**Verified against production 2026-07-29 — the full 3-D Secure round-trip.** A
+manual sandbox-card checkout was performed by the QA lead on the deployed site
+after the Railway variables were in place. The resulting records were then read
+back independently through the admin API:
+
+| Field | Value |
+|---|---|
+| Subscription | `#8`, created `2026-07-29 09:52`, SAR 250.00 |
+| `payment_status` | **`success`** |
+| `transaction_id` | present (Moyasar payment id) |
+| `subscription.status` | `confirmed` |
+| Order items | 5 — Sunday `2026-08-02` through Thursday `2026-08-06`, all `confirmed` |
+
+**Why `payment_status = 'success'` is conclusive here.** That value is written
+in exactly one place — the callback handler in
+[`payment_routes.py`](../BACKEND/routes/payment_routes.py) — and only after it
+re-fetches the payment from Moyasar server-to-server and sees `status = "paid"`.
+For it to be `success` on the deployed database, Moyasar must have reached
+`MOYASAR_CALLBACK_URL` on the deployed backend after a real 3-D Secure
+authentication. The variable under test is therefore proven by the record, not
+merely inspected. (Note that `subscription.status` alone would prove nothing —
+per BUG-06 it is `'confirmed'` from creation; `payment_status` is the signal
+that carries the money.)
+
+This supersedes the earlier position that a deployed sandbox payment had been
+skipped as low-residual-risk. The deployed loop is now verified end to end.
+
+---
+
+### BUG-15 — No discount codes are seeded; every code 404s in production
+**Severity:** Major · **Area:** Payments / Seed data · **Status:** Fixed 2026-07-29
+
+Found during manual verification of the deployed site: applying `SAVE10` at
+checkout failed. It is not a code-path defect — **[`seed.sql`](../BACKEND/seed.sql)
+contained no `INSERT INTO discount_code` at all**, so the deployed
+`discount_code` table was empty and *every* code returned 404, not just this one.
+
+**Repro** (against the deployed backend, before the fix):
+
+```
+POST /api/discount-codes/validate  {"code":"SAVE10"}
+→ HTTP 404  {"detail":"Discount code does not exist."}
+```
+
+**Impact.** "Apply a discount code" is a **Should Have** user story in the Stage
+3 documentation and was 100% non-functional in production. Not Critical —
+checkout still completes at full price, so no customer is blocked from paying —
+but the checkout page advertises the code in its own input placeholder
+(`placeholder="e.g. SAVE10"` in
+[`Checkout.jsx`](../FRONTEND/src/pages/Checkout/Checkout.jsx)), so the UI
+actively invites the customer to enter a value that cannot work.
+
+**Why every local environment looked healthy.** `SAVE10`, `SAVE25`,
+`INACTIVE10` and `EXPIRED10` exist in developer databases because
+[`test-customer-flow.py`](test-customer-flow.py) **inserts them as runtime
+fixtures**. Anyone who had run the QA suite had a working `SAVE10`; anyone who
+had only loaded the seed did not. A textbook "works on my machine" divergence,
+and the reason this survived to production.
+
+**Why the regression suite could not catch it.** The suite creates the fixture
+and then asserts the endpoint validates it — proving the *code path* is
+correct while never checking that the *seed* supplies what the *UI advertises*.
+Structurally the same blind spot as BUG-12: the suite constructs its own world
+and then verifies that world. Third instance in this report of a defect that
+sat outside what the tests could see.
+
+**Fix:** a `DISCOUNT CODES` block added to `seed.sql` inserting the two working
+promotional codes (`SAVE10` 10%, `SAVE25` 25%), guarded by
+`ON CONFLICT (code) DO NOTHING` so it is safe against databases that already
+have them. The deliberately invalid fixtures (`INACTIVE10`, `EXPIRED10`)
+were **not** added — they exist to prove rejection paths and belong to the QA
+suites that assert on them, not to a demo environment.
+
+**Verified in production 2026-07-29**, after applying the block to the Railway
+database, by calling the deployed API directly:
+
+| Request | Result |
+|---|---|
+| `SAVE10` | **200** — `discount_code_id: 1`, `10.00` |
+| `save10` (lower-case) | **200** — resolves to `SAVE10`; the `UPPER(code)` lookup works |
+| `SAVE25` | **200** — `25.00` |
+| `NOTREAL` | **404** — the rejection path still behaves; the fix did not make validation permissive |
+
+**Operational note.** Re-deploying does not re-run `seed.sql`, so an existing
+deployed database needs the block applied once by hand:
+
+```bash
+psql "$RAILWAY_PUBLIC_DATABASE_URL" -c "INSERT INTO discount_code (code, discount_percentage, is_active, expires_at) VALUES ('SAVE10', 10.00, TRUE, NULL), ('SAVE25', 25.00, TRUE, NULL) ON CONFLICT (code) DO NOTHING;"
+```
 
 ---
 
@@ -452,14 +563,36 @@ Three things this establishes beyond "the service responds":
   otherwise catch: a wrong value leaves the backend looking perfectly healthy
   over curl while every request from the real frontend is blocked by the
   browser.
-* **The database was provisioned from the current schema.** This is the first
-  environment built without the discarded `review` table.
+* **The deployed database predates the current schema — corrected 2026-07-29.**
+  An earlier draft of this section claimed the Railway database had been
+  provisioned from the current `schema.sql`, "the first environment built
+  without the discarded `review` table." That was inferred from the seeded data
+  looking correct and was **never verified**. Inspecting the deployed database
+  shows the vestigial `review` table is still present: the database was created
+  before the reviews cleanup landed and has not been rebuilt since. Harmless —
+  the table is empty and referenced by nothing — but it is a concrete instance
+  of the pattern behind BUG-15: **an existing deployed database never picks up
+  changes to `schema.sql` or `seed.sql`.** Those files describe how a *new*
+  database is built; every deployed one drifts from them until it is explicitly
+  migrated or rebuilt.
 
 **What a green run here still does not cover.** Every check is an API call, so
 this says nothing about whether the pages work — the same blind spot described
-above, and the reason BUG-12 survived a fully green regression suite. The
-deployment is verified as *reachable and correctly configured*, not as
-*usable end to end*. The deployed checkout's return-leg configuration is now
-verified (see BUG-14), but no sandbox-card payment has been run against the
-deployed site — the local end-to-end run of 2026-07-28 is the closest
-evidence for the full loop.
+above, and the reason BUG-12 survived a fully green regression suite.
+
+**Closed separately by a manual production checkout, 2026-07-29.** The QA lead
+ran a sandbox-card payment through the deployed site end to end; the resulting
+subscription (`#8`) carries `payment_status = 'success'` with a Moyasar
+transaction id and 5 confirmed order items, read back independently through the
+admin API. Because that payment status can only be written by the callback
+after a server-to-server confirmation from Moyasar, the deployed checkout —
+including the 3-D Secure return leg that BUG-14 concerned — is verified end to
+end, not merely reachable. Combined with the browser-driven local run of
+2026-07-28, both the customer journey and the deployed payment loop now have
+direct evidence behind them.
+
+The residual gap is narrower than before but real: **the deployed *pages* still
+have no automated coverage.** Both end-to-end confirmations were performed by
+hand, so they verify the product at a point in time rather than protecting it
+from regression. Browser-level automation of the three journeys remains the
+obvious next investment.
