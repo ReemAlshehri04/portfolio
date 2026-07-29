@@ -183,6 +183,12 @@ def list_orders(admin_user: dict = Depends(verify_admin)):
 @router.get("/restaurants", response_model=list[RestaurantDetailResponse])
 def list_all_restaurants(status: str = None, admin_user: dict = Depends(verify_admin)):
     """List all restaurants with their approval status"""
+    if status and status.lower() not in ("pending", "approved", "rejected"):
+        raise HTTPException(
+            status_code=422,
+            detail="status must be one of: pending, approved, rejected"
+        )
+
     conn = None
     cursor = None
 
