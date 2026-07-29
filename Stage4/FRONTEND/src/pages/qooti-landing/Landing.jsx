@@ -1,13 +1,13 @@
 import "./Landing.css";
 import heroImage from "../../assets/landingpage.jpg";
-import { Link } from "react-router-dom";
+import {Link} from "react-router-dom";
 function Landing() {
   return (
     <>
       <nav className="ld-nav">
         <div className="ld-nav-inner">
           <a href="#top" className="ld-logo">
-            🍽️ Qooti
+            Qooti
           </a>
           <ul className="ld-nav-links">
             <li>
@@ -20,7 +20,11 @@ function Landing() {
               <a href="#team">Team</a>
             </li>
           </ul>
-          <Link className="ld-btn-primary" to="/home">
+          <Link
+            className="ld-btn-primary"
+            to="/home"
+            onClick={() => localStorage.setItem("landingSeen", "true")}
+          >
             Open Qooti →
           </Link>
         </div>
@@ -28,7 +32,7 @@ function Landing() {
       <header
         className="ld-hero"
         id="top"
-        style={{ backgroundImage: `url(${heroImage})` }}
+        style={{backgroundImage: `url(${heroImage})`}}
       >
         <div className="ld-hero-overlay" />
         <div className="ld-hero-content">
@@ -90,156 +94,146 @@ function Landing() {
         </div>
       </section>
       <section className="ld-about" id="about">
-        <div className="ld-wrap ld-about-grid">
-          <div>
-            <h2 className="ld-section-title">
-              Our Story and Why We Built Qooti
-            </h2>
-            <div className="ld-about-card">
-              <p>
-                Most healthy-meal subscriptions ask for a full month with one
-                kitchen. Skip a day you don't like the menu and you've paid for
-                it anyway — which is exactly where people quietly fall off the
-                plan. For anyone juggling work or school, the alternative isn't
-                better: ordering from a different restaurant every day means
-                re-entering your address, re-checking out, and coordinating a
-                new courier each time.
-              </p>
-              <p>
-                Qooti removes the trade-off. Subscribe once, then build your
-                week across every approved kitchen — a bowl from one restaurant
-                on Sunday, a stir-fry from another on Wednesday — under one
-                plan, one address, one flat price.
-              </p>
-              <div className="ld-holberton-line">
-                Qooti is a portfolio project built for{" "}
+        <div className="ld-wrap">
+          <h2 className="ld-section-title">Our Story and Why We Built Qooti</h2>
+
+          <div className="ld-about-card">
+            <p>
+              Most healthy-meal subscriptions ask for a full month with one
+              kitchen. Skip a day you don't like the menu and you've paid for it
+              anyway — which is exactly where people quietly fall off the plan.
+              For anyone juggling work or school, the alternative isn't better:
+              ordering from a different restaurant every day means re-entering
+              your address, re-checking out, and coordinating a new courier each
+              time.
+            </p>
+
+            <p>
+              Qooti removes the trade-off. Subscribe once, then build your week
+              across every approved kitchen — a bowl from one restaurant on
+              Sunday, a stir-fry from another on Wednesday — under one plan, one
+              address, one flat price.
+            </p>
+
+            <div className="ld-holberton-line">
+              Qooti is a portfolio project built for{" "}
+              <a
+                href="https://hbtn.dev/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Holberton School.
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="ld-team-section" id="team">
+        <div className="ld-wrap">
+          <h2 className="ld-section-title">Meet the Team</h2>
+
+          <ul className="ld-team-list">
+            <li className="ld-team-member">
+              <p className="ld-team-name">Reem Alshehri</p>
+              <div className="ld-team-social">
                 <a
-                  href="https://hbtn.dev/"
+                  href="https://www.linkedin.com/in/reem-alshehri-79383233b"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Holberton School .
+                  LinkedIn
+                </a>
+                <a
+                  href="https://github.com/ReemAlshehri04"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  GitHub
                 </a>
               </div>
-            </div>
-          </div>
-          <div id="team">
-            <p className="ld-side-title">Team</p>
-            <ul className="ld-team-list">
-              <li className="ld-team-member">
-                <p className="ld-team-name">Reem Alshehri</p>
-                <div className="ld-team-social">
-                  <a
-                    href="https://www.linkedin.com/in/reem-alshehri-79383233b"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    LinkedIn
-                  </a>
-                  <a
-                    href="https://github.com/ReemAlshehri04"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    GitHub
-                  </a>
-                </div>
-              </li>
-              <li className="ld-team-member">
-                <p className="ld-team-name">Badriah AlMalki</p>
-                <div className="ld-team-social">
-                  <a
-                    href="https://www.linkedin.com/in/badriah-b-almalki/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    LinkedIn
-                  </a>
-                  <a
-                    href="https://github.com/badriahalmalki"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    GitHub
-                  </a>
-                </div>
-              </li>
-              <li className="ld-team-member">
-                <p className="ld-team-name">Yara Ibrahim</p>
-                <div className="ld-team-social">
-                  <a
-                    href="https://www.linkedin.com/in/yara-ibrahim-985377380"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    LinkedIn
-                  </a>
-                  <a
-                    href="https://github.com/yaraibrahim"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    GitHub
-                  </a>
-                </div>
-              </li>
-              <li className="ld-team-member">
-                <p className="ld-team-name">Moudhi Almutlaq</p>
-                <div className="ld-team-social">
-                  <a
-                    href="https://www.linkedin.com/in/moudhi-almutlaq"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    LinkedIn
-                  </a>
-                  <a
-                    href="https://github.com/Modi-01"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    GitHub
-                  </a>
-                </div>
-              </li>
-            </ul>
-            <p className="ld-side-title">Source</p>
-            <a
-              className="ld-repo-link"
-              href="https://github.com/ReemAlshehri04/portfolio"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <span>github.com/ReemAlshehri04/portfolio</span>
-              <span>↗</span>
-            </a>
-          </div>
+            </li>
+
+            <li className="ld-team-member">
+              <p className="ld-team-name">Badriah AlMalki</p>
+              <div className="ld-team-social">
+                <a
+                  href="https://www.linkedin.com/in/badriah-b-almalki/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  LinkedIn
+                </a>
+                <a
+                  href="https://github.com/badriahalmalki"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  GitHub
+                </a>
+              </div>
+            </li>
+
+            <li className="ld-team-member">
+              <p className="ld-team-name">Yara Ibrahim</p>
+              <div className="ld-team-social">
+                <a
+                  href="https://www.linkedin.com/in/yara-ibrahim-985377380"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  LinkedIn
+                </a>
+                <a
+                  href="https://github.com/yaraibrahim"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  GitHub
+                </a>
+              </div>
+            </li>
+
+            <li className="ld-team-member">
+              <p className="ld-team-name">Moudhi Almutlaq</p>
+              <div className="ld-team-social">
+                <a
+                  href="https://www.linkedin.com/in/moudhi-almutlaq"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  LinkedIn
+                </a>
+                <a
+                  href="https://github.com/Modi-01"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  GitHub
+                </a>
+              </div>
+            </li>
+          </ul>
+
+          <h3 className="ld-side-title">Source</h3>
+
+          <a
+            className="ld-repo-link"
+            href="https://github.com/ReemAlshehri04/portfolio"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span>github.com/ReemAlshehri04/portfolio</span>
+            <span>↗</span>
+          </a>
         </div>
       </section>
       <footer className="ld-footer">
         <div className="ld-wrap">
           <a href="#top" className="ld-logo">
-            🍽️ Qooti
+            Qooti
           </a>
           <ul className="ld-foot-links">
-            <li>
-              <a
-                href="https://portfolio-delta-murex-34.vercel.app"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Live App
-              </a>
-            </li>
-            <li>
-              <a
-                href="https://github.com/ReemAlshehri04/portfolio"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Repository
-              </a>
-            </li>
             <li>
               <a href="#about">About</a>
             </li>

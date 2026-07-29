@@ -3,11 +3,9 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { apiGet } from "../../services/auth";
 import { useAuth } from "../../context/AuthContext";
-
 const SHOWCASE_ICONS = ["eco", "water_drop", "local_dining", "spa"];
 const TAG_LABELS = { HighProtein: "High Protein", LowCarb: "Low Carb", GlutenFree: "Gluten Free" };
 const labelizeTag = (tag) => TAG_LABELS[tag] || tag;
-
 function Restaurants() {
   const { user, logout } = useAuth();
   const [restaurants, setRestaurants] = useState([]);
@@ -79,7 +77,6 @@ function Restaurants() {
           </div>
         </nav>
 
-        {/* Main */}
         <main className="rst-main">
           {loading ? (
             <div className="rst-loading">
@@ -94,7 +91,6 @@ function Restaurants() {
             </div>
           ) : (
             <>
-              {/* Hero */}
               <div className="rst-hero">
                 <span className="rst-hero-label">Exceptional Standards</span>
                 <h1 className="rst-hero-title">Our Culinary Partners</h1>
@@ -105,7 +101,6 @@ function Restaurants() {
                 </p>
               </div>
 
-              {/* Restaurant showcases */}
               {restaurants.map((r, index) => {
                 const meals = mealsByRestaurant[r.restaurant_id] || [];
                 const previewDishes = meals.slice(0, 3);
@@ -193,8 +188,6 @@ function Restaurants() {
                   </section>
                 );
               })}
-
-              {/* Sourcing philosophy banner */}
               <div className="rst-banner-section">
                 <div className="rst-banner">
                   <h2 className="rst-banner-title">Our Sourcing Philosophy</h2>
@@ -211,7 +204,6 @@ function Restaurants() {
           )}
         </main>
 
-        {/* Footer */}
         <footer>
           <div className="rst-footer">
             <div className="rst-logo">Qooti</div>
