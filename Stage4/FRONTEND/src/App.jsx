@@ -8,7 +8,7 @@ import RestaurantLogin from "./pages/RestaurantLogin/RestaurantLogin";
 import AdminLogin from "./pages/AdminLogin/AdminLogin";
 import AdminPendingRestaurants from "./pages/AdminPendingRestaurants/AdminPendingRestaurants";
 import WeeklyMealSelection from "./pages/WeeklyMealSelection/WeeklyMealSelection";
-import OrderSummary from "./pages/OrderSummary/OrderSummary";
+import Checkout from "./pages/Checkout/Checkout";
 import PaymentResult from "./pages/PaymentResult/PaymentResult";
 import MyMeals from "./pages/MyMeals/MyMeals";
 import RestaurantOrders from "./pages/RestaurantOrders/RestaurantOrders";
@@ -21,22 +21,26 @@ import MealBrowse from "./pages/MealBrowse/MealBrowse";
 import AdminDashboard from "./pages/AdminDashboard/AdminDashboard";
 import AdminCustomers from "./pages/AdminCustomers/AdminCustomers";
 import AdminOrders from "./pages/AdminOrders/AdminOrders";
-import Payment from "./pages/Payment/Payment";
+import Landing from "./pages/qooti-landing/Landing";
 
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Landing />} />
+          <Route path="/home" element={<Home />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/restaurant-register" element={<RestaurantRegister />} />
           <Route path="/restaurant-login" element={<RestaurantLogin />} />
           <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin/pending-restaurants" element={<AdminPendingRestaurants />} />
+          <Route
+            path="/admin/pending-restaurants"
+            element={<AdminPendingRestaurants />}
+          />
           <Route path="/weekly-selection" element={<WeeklyMealSelection />} />
-          <Route path="/order-summary" element={<OrderSummary />} />
+          <Route path="/checkout" element={<Checkout />} />
           <Route path="/payment-result" element={<PaymentResult />} />
           <Route path="/restaurant/meals" element={<MyMeals />} />
           <Route path="/restaurant/orders" element={<RestaurantOrders />} />
@@ -45,12 +49,13 @@ function App() {
           <Route path="/dashboard" element={<CustomerDashboard />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/restaurants" element={<Restaurants />} />
-          <Route path="/restaurants/:restaurantId/meals" element={<MealBrowse />} />
+          <Route
+            path="/restaurants/:restaurantId/meals"
+            element={<MealBrowse />}
+          />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/customers" element={<AdminCustomers />} />
           <Route path="/admin/orders" element={<AdminOrders />} />
-          <Route path="/payment" element={<Payment />} />
-        
         </Routes>
       </BrowserRouter>
     </AuthProvider>

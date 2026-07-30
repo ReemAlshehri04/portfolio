@@ -22,8 +22,8 @@ function Login() {
 
   const validate = () => {
     const errors = [];
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      errors.push("Please enter a valid email address.");
+    if (!/^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(formData.email)) {
+      errors.push("Please use @gmail if you are a customer.");
     }
     if (formData.password.length < 8) {
       errors.push("Password must be at least 8 characters.");

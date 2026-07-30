@@ -142,7 +142,7 @@ function Register() {
                     className="qp-input"
                     type="text"
                     name="fullName"
-                    placeholder="John Doe"
+                    placeholder="Reem Alshehri"
                     value={formData.fullName}
                     onChange={handleChange}
                   />

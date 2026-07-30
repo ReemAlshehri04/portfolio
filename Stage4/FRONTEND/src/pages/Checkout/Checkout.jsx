@@ -1,4 +1,4 @@
-import "./OrderSummary.css";
+import "./Checkout.css";
 import { useState } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import Navbar from "../../components/Navbar/Navbar";
@@ -13,7 +13,7 @@ const TIME_SLOTS = [
   { value: "15:00", label: "3:00 PM – 5:00 PM" },
   { value: "17:00", label: "5:00 PM – 7:00 PM" },
 ];
-function OrderSummary() {
+function Checkout() {
   const navigate = useNavigate();
   const { state } = useLocation();
   const [cardName, setCardName] = useState("");
@@ -86,7 +86,7 @@ function OrderSummary() {
     setError("");
     if (!isAuthenticated()) {
       navigate("/login", {
-        state: { redirectTo: "/order-summary", redirectState: state },
+        state: { redirectTo: "/checkout", redirectState: state },
       });
       return;
     }
@@ -373,4 +373,4 @@ function OrderSummary() {
     </>
   );
 }
-export default OrderSummary;
+export default Checkout;

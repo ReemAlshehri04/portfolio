@@ -1,14 +1,14 @@
 import "./WeeklyMealSelection.css";
-import { useEffect, useMemo, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import {useEffect, useMemo, useState} from "react";
+import {useNavigate, Link} from "react-router-dom";
 import Navbar from "../../components/Navbar/Navbar";
-import { apiGet, authRequest, getCurrentUser } from "../../services/auth";
+import {apiGet, authRequest, getCurrentUser} from "../../services/auth";
 
 const PLAN_PRICE = 250.0;
 
 const toIso = (d) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
-    d.getDate()
+    d.getDate(),
   ).padStart(2, "0")}`;
 
 function buildWeek() {
@@ -52,7 +52,7 @@ function WeeklyMealSelection() {
       .then((data) => {
         const today = toIso(new Date());
         const active = (data.subscriptions || []).find(
-          (s) => s.status === "confirmed" && s.end_date >= today
+          (s) => s.status === "confirmed" && s.end_date >= today,
         );
         setActiveSubscription(active || null);
       })
@@ -70,10 +70,10 @@ function WeeklyMealSelection() {
                 (data.meals ?? []).map((m) => ({
                   ...m,
                   restaurant_name: r.restaurant_name,
-                }))
+                })),
               )
-              .catch(() => [])
-          )
+              .catch(() => []),
+          ),
         );
         setMeals(perRestaurant.flat());
       })
@@ -92,7 +92,7 @@ function WeeklyMealSelection() {
   }, [meals]);
 
   const handleSelect = (meal) => {
-    setSelections((prev) => ({ ...prev, [activeDay]: meal }));
+    setSelections((prev) => ({...prev, [activeDay]: meal}));
 
     const idx = days.findIndex((d) => d.key === activeDay);
     const next = days
@@ -104,7 +104,7 @@ function WeeklyMealSelection() {
 
   const handleRemove = (dayKey) => {
     setSelections((prev) => {
-      const next = { ...prev };
+      const next = {...prev};
       delete next[dayKey];
       return next;
     });
@@ -113,7 +113,7 @@ function WeeklyMealSelection() {
   const selectedCount = Object.keys(selections).length;
   const totalCalories = Object.values(selections).reduce(
     (sum, m) => sum + (m.calories || 0),
-    0
+    0,
   );
   const allSelected = selectedCount === days.length;
   const activeMeal = selections[activeDay];
@@ -121,7 +121,7 @@ function WeeklyMealSelection() {
 
   const handleReviewOrder = () => {
     if (!allSelected) return;
-    navigate("/order-summary", {
+    navigate("/checkout", {
       state: {
         startDate: days[0].iso,
         endDate: days[days.length - 1].iso,
@@ -141,7 +141,7 @@ function WeeklyMealSelection() {
     return (
       <div className="wms-body">
         <Navbar />
-        <main style={{ padding: "64px 32px", textAlign: "center" }}>
+        <main style={{padding: "64px 32px", textAlign: "center"}}>
           Checking your subscription…
         </main>
       </div>
@@ -160,14 +160,14 @@ function WeeklyMealSelection() {
             textAlign: "center",
           }}
         >
-          <h1 style={{ fontSize: 24, marginBottom: 12 }}>
+          <h1 style={{fontSize: 24, marginBottom: 12}}>
             You already have an active plan
           </h1>
-          <p style={{ color: "#5e5e5b", marginBottom: 24 }}>
+          <p style={{color: "#5e5e5b", marginBottom: 24}}>
             Your current weekly plan runs until {activeSubscription.end_date}.
             You can start a new selection once it ends.
           </p>
-          <Link to="/profile" style={{ color: "#325f3f", fontWeight: 600 }}>
+          <Link to="/profile" style={{color: "#325f3f", fontWeight: 600}}>
             Go to your profile →
           </Link>
         </main>
@@ -189,7 +189,8 @@ function WeeklyMealSelection() {
           <div>
             <h1 className="wms-title">Weekly Selection</h1>
             <p className="wms-subtitle">
-              Pick one meal per day from any of our partner restaurants for next week (Sunday to Thursday).
+              Pick one meal per day from any of our partner restaurants for next
+              week (Sunday to Thursday).
             </p>
 
             {error && <div className="wms-error">{error}</div>}
@@ -214,12 +215,18 @@ function WeeklyMealSelection() {
             {activeMeal ? (
               <div className="wms-meal-card">
                 <div className="wms-meal-img">
-                  {activeMeal.image_url ? <img src={activeMeal.image_url} alt={activeMeal.name} /> : "🍽️"}
+                  {activeMeal.image_url ? (
+                    <img src={activeMeal.image_url} alt={activeMeal.name} />
+                  ) : (
+                    "🍽️"
+                  )}
                 </div>
                 <div className="wms-meal-info">
                   <div className="wms-tags">
                     {(activeMeal.tags || []).map((tag) => (
-                      <span key={tag} className="wms-tag">{tag}</span>
+                      <span key={tag} className="wms-tag">
+                        {tag}
+                      </span>
                     ))}
                   </div>
                   <div className="wms-meal-name">{activeMeal.name}</div>
@@ -245,7 +252,8 @@ function WeeklyMealSelection() {
               </div>
             ) : (
               <div className="wms-empty">
-                No meal selected for {activeDayInfo.full} yet — choose one below.
+                No meal selected for {activeDayInfo.full} yet — choose one
+                below.
               </div>
             )}
 
@@ -253,9 +261,7 @@ function WeeklyMealSelection() {
             {loading ? (
               <div className="wms-empty">Loading meals…</div>
             ) : meals.length === 0 ? (
-              <div className="wms-empty">
-                No meals are available right now.
-              </div>
+              <div className="wms-empty">No meals are available right now.</div>
             ) : (
               mealsByRestaurant.map(([restaurantName, restaurantMeals]) => (
                 <div key={restaurantName} className="wms-restaurant-group">
@@ -269,7 +275,9 @@ function WeeklyMealSelection() {
                           className={`wms-pick-card ${chosen ? "chosen" : ""}`}
                         >
                           <div className="wms-pick-img">
-                            {meal.image_url ? <img src={meal.image_url} alt={meal.name} /> : null}
+                            {meal.image_url ? (
+                              <img src={meal.image_url} alt={meal.name} />
+                            ) : null}
                           </div>
                           <div className="wms-pick-name">{meal.name}</div>
                           <div className="wms-pick-stats">
@@ -278,7 +286,9 @@ function WeeklyMealSelection() {
                           </div>
                           <div className="wms-tags">
                             {(meal.tags || []).map((tag) => (
-                              <span key={tag} className="wms-tag">{tag}</span>
+                              <span key={tag} className="wms-tag">
+                                {tag}
+                              </span>
                             ))}
                           </div>
                           <button
@@ -303,7 +313,9 @@ function WeeklyMealSelection() {
 
             <div className="wms-summary-row">
               <span>Meals Selected</span>
-              <strong>{selectedCount}/{days.length}</strong>
+              <strong>
+                {selectedCount}/{days.length}
+              </strong>
             </div>
             <div className="wms-summary-row">
               <span>Total Calories</span>
@@ -311,7 +323,9 @@ function WeeklyMealSelection() {
             </div>
             <div className="wms-summary-row">
               <span>Week Starts</span>
-              <strong>{days[0].full} {days[0].iso}</strong>
+              <strong>
+                {days[0].full} {days[0].iso}
+              </strong>
             </div>
 
             <div className="wms-total-row">
@@ -332,7 +346,8 @@ function WeeklyMealSelection() {
             </button>
 
             <p className="wms-plan-note">
-              One flat weekly price — Sunday to Thursday lunch, delivery included.
+              One flat weekly price — Sunday to Thursday lunch, delivery
+              included.
             </p>
           </aside>
         </main>

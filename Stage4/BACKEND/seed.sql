@@ -151,6 +151,15 @@ VALUES
     ((SELECT restaurant_id FROM restaurant WHERE restaurant_name = 'Fit Kitchen'), 'Protein Shrimp Bowl', 'Grilled shrimp, brown rice, edamame, avocado, sriracha mayo', 440, 32.00, 40.00, 15.00, ARRAY['DairyFree'], 'https://images.unsplash.com/photo-1559847844-5315695dadae?w=800&h=600&fit=crop');
 
 -- ============================================================
+-- DISCOUNT CODES
+-- ============================================================
+INSERT INTO discount_code (code, discount_percentage, is_active, expires_at)
+VALUES
+    ('SAVE10', 10.00, TRUE, NULL),
+    ('SAVE25', 25.00, TRUE, NULL)
+ON CONFLICT (code) DO NOTHING;
+
+-- ============================================================
 -- SUBSCRIPTIONS FOR TEST CLIENT
 -- ============================================================
 INSERT INTO subscription (

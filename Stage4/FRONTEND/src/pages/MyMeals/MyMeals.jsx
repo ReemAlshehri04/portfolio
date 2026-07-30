@@ -11,24 +11,31 @@ function MyMeals() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const fetchMeals = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const { restaurant } = await authRequest("/api/restaurants/me");
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || "http://localhost:8000"}/api/restaurants/${restaurant.restaurant_id}/meals`);
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || "Failed to load meals.");
-      setMeals(data.meals || []);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
+    let isMounted = true;
+
+    const fetchMeals = async () => {
+      if (!isMounted) return;
+      setLoading(true);
+      setError("");
+      try {
+        const { restaurant } = await authRequest("/api/restaurants/me");
+        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || "http://localhost:8000"}/api/restaurants/${restaurant.restaurant_id}/meals`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Failed to load meals.");
+        if (isMounted) setMeals(data.meals || []);
+      } catch (err) {
+        if (isMounted) setError(err.message);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
     fetchMeals();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleDelete = async (mealId) => {

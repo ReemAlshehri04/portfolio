@@ -249,9 +249,8 @@ def test_listing_filters(admin, c_id, d_id, e_id):
           f"rejected={rejected}")
 
     r = admin_restaurants(admin, "banana")
-    all_ids = ids_of(admin_restaurants(admin))
-    check("AR5", "unknown filter value is ignored → 200 all (documented contract)",
-          r.status_code == 200 and set(ids_of(r)) == set(all_ids),
+    check("AR5", "unknown filter value → 422 naming the allowed values (BUG-10 fix)",
+          r.status_code == 422 and "pending" in r.text,
           f"status={r.status_code}")
 
     r = requests.get(f"{BASE_URL}/api/admin/restaurants/pending", headers=admin)
