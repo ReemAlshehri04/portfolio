@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { authRequest } from "../../services/auth";
 import { useAuth } from "../../context/AuthContext";
+import QootiLogo from "../../components/QootiLogo/QootiLogo";
 import "./AdminOrders.css";
 const STATUS_COLORS = {
   confirmed: { bg: "#e6f4ea", color: "#188038" },
@@ -51,7 +52,9 @@ function AdminOrders() {
 
       <div className="admin-body">
         <aside className="admin-sidebar">
-          <div className="admin-logo">Qooti Admin</div>
+          <div className="admin-logo" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <QootiLogo scale={0.6} /> Admin
+          </div>
           <nav className="admin-nav">
             <a href="/admin/dashboard" className="admin-nav-item">
               <span className="material-symbols-outlined">dashboard</span>

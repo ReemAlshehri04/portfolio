@@ -1,6 +1,7 @@
 import "./Payment.css";
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import QootiLogo from "../../components/QootiLogo/QootiLogo";
 
 function Payment() {
   const navigate = useNavigate();
@@ -75,7 +76,7 @@ function Payment() {
         {/* Navbar */}
         <nav className="pay-nav">
           <div className="pay-nav-inner">
-            <Link to="/" className="pay-logo">Qooti</Link>
+            <Link to="/" className="pay-logo"><QootiLogo scale={0.6} /></Link>
             <div className="pay-nav-links">
               <a href="#">Meal Plans</a>
               <a href="#">Pricing</a>
@@ -216,7 +217,7 @@ function Payment() {
         <footer className="pay-footer">
           <div className="pay-footer-inner">
             <div>
-              <div className="pay-footer-logo">Qooti</div>
+              <div className="pay-footer-logo"><QootiLogo scale={0.6} /></div>
               <p className="pay-footer-desc">Elevating your lifestyle through precision nutrition and effortless culinary experiences.</p>
             </div>
             <div>

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { authRequest } from "../../services/auth";
 import { useAuth } from "../../context/AuthContext";
+import QootiLogo from "../../components/QootiLogo/QootiLogo";
 
 function MyMeals() {
   const navigate = useNavigate();
@@ -81,11 +82,11 @@ function MyMeals() {
         .mm-user { font-size: 13px; color: #414941; font-weight: 600; }
 
         .mm-stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
-        .mm-stat-card { background: #fff; border-radius: 16px; padding: 20px; border: 1px solid #e8ebe8; }
+        .mm-stat-card { background: #fff; border-radius: 28px; padding: 20px; box-shadow: 0 2px 12px rgba(26,28,25,0.04); }
         .mm-stat-value { font-family: 'Hanken Grotesk', sans-serif; font-size: 26px; font-weight: 700; color: #1a1c19; margin-bottom: 4px; }
         .mm-stat-label { font-size: 12px; color: #5e5e5b; font-weight: 500; }
 
-        .mm-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(26,28,25,0.04); }
+        .mm-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 28px; overflow: hidden; box-shadow: 0 2px 12px rgba(26,28,25,0.04); }
         .mm-table th { background: #f4f4ee; text-align: left; padding: 14px 16px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: #717971; }
         .mm-table td { padding: 14px 16px; border-top: 1px solid #eceee9; font-size: 14px; vertical-align: top; }
         .mm-meal-name { font-weight: 600; margin-bottom: 2px; }
@@ -97,14 +98,14 @@ function MyMeals() {
         .mm-edit-btn { background: #f4f4ee; color: #414941; }
         .mm-delete-btn { background: #fdecea; color: #b3261e; }
         .mm-error { color: #b3261e; font-size: 14px; margin-bottom: 16px; }
-        .mm-empty { background: #fff; border: 2px dashed #c1c9bf; border-radius: 16px; padding: 40px; text-align: center; color: #717971; }
+        .mm-empty { background: #fff; border: none; box-shadow: 0 2px 12px rgba(26,28,25,0.04); border-radius: 28px; padding: 40px; text-align: center; color: #717971; }
         .material-symbols-outlined { font-variation-settings: 'FILL'0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; font-family: 'Material Symbols Outlined'; }
       `}</style>
 
       <div className="mm-body">
         <aside className="mm-sidebar">
           <div className="mm-logo">
-            Qooti
+            <QootiLogo scale={0.55} />
             <small>Partner Portal</small>
           </div>
           <nav className="mm-nav">

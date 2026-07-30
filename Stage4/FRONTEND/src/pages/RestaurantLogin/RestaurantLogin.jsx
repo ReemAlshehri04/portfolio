@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { loginUser, roleHome } from "../../services/auth";
 import { useAuth } from "../../context/AuthContext";
+import QootiLogo from "../../components/QootiLogo/QootiLogo";
 
 function RestaurantLogin() {
   const navigate = useNavigate();
@@ -66,7 +67,7 @@ function RestaurantLogin() {
       <div className="rl-body">
         <main className="rl-main">
           <section className="rl-left">
-            <div className="rl-logo-top">Qooti</div>
+            <div className="rl-logo-top"><QootiLogo scale={0.75} /></div>
             <h1 className="rl-left-title">Welcome back, partner.</h1>
             <p className="rl-left-desc">
               Sign in to manage your menu, track orders, and grow with

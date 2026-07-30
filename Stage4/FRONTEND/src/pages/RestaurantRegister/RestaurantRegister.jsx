@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { registerUser } from "../../services/auth";
+import QootiLogo from "../../components/QootiLogo/QootiLogo";
 
 function RestaurantRegister() {
   const navigate = useNavigate();
@@ -99,7 +100,7 @@ function RestaurantRegister() {
       <div className="pr-body">
         <main className="pr-main">
           <section className="pr-left">
-            <div className="pr-logo-top">Qooti</div>
+            <div className="pr-logo-top"><QootiLogo scale={0.75} /></div>
             <h1 className="pr-left-title">Join our network of healthy restaurants</h1>
             <p className="pr-left-desc">
               Partner with Qooti to reach thousands of health-conscious

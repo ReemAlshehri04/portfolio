@@ -289,6 +289,7 @@ function OrderSummary() {
                   <input
                     className="os-input"
                     type="text"
+                    autoComplete="cc-name"
                     placeholder="e.g. Abdullah Ahmed"
                     value={cardName}
                     onChange={(e) => setCardName(e.target.value)}
@@ -302,6 +303,7 @@ function OrderSummary() {
                     className="os-input"
                     type="text"
                     inputMode="numeric"
+                    autoComplete="cc-number"
                     placeholder="0000 0000 0000 0000"
                     value={cardNumber}
                     onChange={(e) => setCardNumber(e.target.value)}
@@ -315,6 +317,7 @@ function OrderSummary() {
                     <input
                       className="os-input"
                       type="text"
+                      autoComplete="cc-exp"
                       placeholder="MM/YY"
                       value={expiry}
                       onChange={(e) => setExpiry(e.target.value)}
@@ -327,6 +330,7 @@ function OrderSummary() {
                       className="os-input"
                       type="password"
                       inputMode="numeric"
+                      autoComplete="cc-csc"
                       placeholder="•••"
                       value={cvv}
                       onChange={(e) => setCvv(e.target.value)}

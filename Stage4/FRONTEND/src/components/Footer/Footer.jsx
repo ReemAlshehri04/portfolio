@@ -2,6 +2,7 @@ import { useState } from "react";
 import "./Footer.css";
 import { Globe, ArrowUp } from "lucide-react";
 import { FaInstagram } from "react-icons/fa";
+import QootiLogo from "../QootiLogo/QootiLogo";
 
 function Footer() {
   const [email, setEmail] = useState("");
@@ -20,7 +21,7 @@ function Footer() {
       <div className="footer-top">
 
         <div className="footer-column">
-          <h3>Qooti</h3>
+          <h3><QootiLogo scale={1} /></h3>
 
           <p>
             The gold standard in bio-available

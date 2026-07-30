@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { authRequest } from "../../services/auth";
 import { useAuth } from "../../context/AuthContext";
+import QootiLogo from "../../components/QootiLogo/QootiLogo";
 
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"];
 
@@ -84,29 +85,29 @@ function RestaurantOrders() {
         .ro-user { font-size: 13px; color: #414941; font-weight: 600; }
 
         .ro-day-tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
-        .ro-day-tab { background: #fff; border: 2px solid #e8ebe8; border-radius: 9999px; padding: 10px 20px; font-size: 14px; font-weight: 600; color: #414941; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
-        .ro-day-tab:hover { border-color: #325f3f; }
-        .ro-day-tab.active { background: #325f3f; border-color: #325f3f; color: #fff; }
+        .ro-day-tab { background: #fff; border: none; box-shadow: 0 2px 12px rgba(26,28,25,0.04); border-radius: 9999px; padding: 10px 20px; font-size: 14px; font-weight: 600; color: #414941; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+        .ro-day-tab:hover { box-shadow: 0 2px 12px rgba(26,28,25,0.1); }
+        .ro-day-tab.active { background: #325f3f; color: #fff; box-shadow: none; }
         .ro-day-count { font-size: 11px; opacity: 0.8; }
 
         .ro-section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
         .ro-section-title { font-family: 'Hanken Grotesk', sans-serif; font-size: 18px; font-weight: 700; }
-        .ro-search { padding: 10px 16px; border-radius: 9999px; background: #fff; border: 1px solid #e8ebe8; font-size: 14px; width: 240px; font-family: inherit; }
-        .ro-search:focus { outline: none; border-color: #325f3f; }
+        .ro-search { padding: 10px 16px; border-radius: 9999px; background: #fff; border: none; box-shadow: 0 2px 12px rgba(26,28,25,0.04); font-size: 14px; width: 240px; font-family: inherit; }
+        .ro-search:focus { outline: none; box-shadow: 0 0 0 2px #325f3f; }
 
-        .ro-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(26,28,25,0.04); }
-        .ro-table th { background: #f4f4ee; text-align: left; padding: 14px 16px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: #717971; }
-        .ro-table td { padding: 14px 16px; border-top: 1px solid #eceee9; font-size: 14px; }
+        .ro-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 28px; overflow: hidden; box-shadow: 0 2px 12px rgba(26,28,25,0.04); }
+        .ro-table th { background: #fafaf4; text-align: left; padding: 14px 24px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: #717971; }
+        .ro-table td { padding: 14px 24px; border-top: 1px solid #f4f4ee; font-size: 14px; }
         .ro-status-pill { font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 9999px; background: #e6f4ea; color: #188038; text-transform: capitalize; }
         .ro-error { color: #b3261e; font-size: 14px; margin-bottom: 16px; }
-        .ro-empty { background: #fff; border: 2px dashed #c1c9bf; border-radius: 16px; padding: 40px; text-align: center; color: #717971; }
+        .ro-empty { background: #fff; border: none; box-shadow: 0 2px 12px rgba(26,28,25,0.04); border-radius: 28px; padding: 40px; text-align: center; color: #717971; }
         .material-symbols-outlined { font-variation-settings: 'FILL'0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; font-family: 'Material Symbols Outlined'; }
       `}</style>
 
       <div className="ro-body">
         <aside className="ro-sidebar">
           <div className="ro-logo">
-            Qooti
+            <QootiLogo scale={0.55} />
             <small>Partner Portal</small>
           </div>
           <nav className="ro-nav">
