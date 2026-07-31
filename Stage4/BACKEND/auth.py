@@ -1,5 +1,3 @@
-import token
-
 from passlib.context import CryptContext
 from jose import jwt
 from datetime import datetime, timedelta, timezone
@@ -59,6 +57,12 @@ def verify_token(token: str) -> dict:
 
 
 def get_current_user(token: str = Depends(oauth2_scheme)):
+    """The single authentication dependency for the whole API.
+
+    Returns the token payload as {user_id, email, user_type}. Raises 401 if the
+    Authorization header is missing or malformed (handled by oauth2_scheme), or
+    if the token is forged, expired, or missing required claims.
+    """
     try:
         return verify_token(token)
     except JWTError:
@@ -66,4 +70,18 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
             status_code=401,
             detail="Invalid or expired authentication token."
         )
-    
+
+
+def require_admin(current_user: dict = Depends(get_current_user)) -> dict:
+    """Authentication plus an admin role check, for the /api/admin routes.
+
+    Builds on get_current_user so there is only one place that verifies a token:
+    401 for a missing or invalid token, 403 for a valid token that is not an admin.
+    """
+    if current_user["user_type"] != "admin":
+        raise HTTPException(
+            status_code=403,
+            detail="Admin access required"
+        )
+    return current_user
+

@@ -3,11 +3,11 @@ import os
 from urllib.parse import urlencode
 
 import requests
-from fastapi import APIRouter, HTTPException, Header, Depends
+from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import RedirectResponse
 from database import get_db_connection
 from schemas import PaymentProcessRequest, PaymentProcessResponse
-from auth import verify_token
+from auth import get_current_user
 
 router = APIRouter(
     prefix="/api/payments",
@@ -22,18 +22,6 @@ def _result_redirect(**params) -> RedirectResponse:
     frontend = os.getenv("FRONTEND_BASE_URL", "http://localhost:5173")
     query = urlencode({k: v for k, v in params.items() if v is not None})
     return RedirectResponse(f"{frontend}/payment-result?{query}")
-
-
-def verify_user(authorization: str = Header(None)) -> dict:
-    """Verify the request carries a valid token and return its payload"""
-    if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Missing or invalid authorization header")
-
-    token = authorization[7:]
-    try:
-        return verify_token(token)
-    except Exception as e:
-        raise HTTPException(status_code=401, detail=f"Invalid token: {str(e)}")
 
 
 def moyasar_auth():
@@ -131,7 +119,7 @@ def moyasar_fetch_payment(moyasar_payment_id):
 @router.post("", response_model=PaymentProcessResponse)
 def process_payment(
     request: PaymentProcessRequest,
-    current_user: dict = Depends(verify_user)
+    current_user: dict = Depends(get_current_user)
 ):
     """
     Start the payment for a subscription via Moyasar.
