@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Header, Depends
+from fastapi import APIRouter, HTTPException, Depends
 import psycopg2.errors
 from database import get_db_connection
 from schemas import (
@@ -9,7 +9,7 @@ from schemas import (
     RestaurantStatus,
     AdminOverviewResponse
 )
-from auth import verify_token
+from auth import require_admin
 
 router = APIRouter(
     prefix="/api/admin",
@@ -17,25 +17,8 @@ router = APIRouter(
 )
 
 
-def verify_admin(authorization: str = Header(None)) -> dict:
-    """Verify that the request is from an admin user"""
-    if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Missing or invalid authorization header")
-
-    token = authorization[7:]
-    try:
-        payload = verify_token(token)
-        if payload.get("user_type") != "admin":
-            raise HTTPException(status_code=403, detail="Admin access required")
-        return payload
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=401, detail=f"Invalid token: {str(e)}")
-
-
 @router.get("/overview", response_model=AdminOverviewResponse)
-def get_admin_overview(admin_user: dict = Depends(verify_admin)):
+def get_admin_overview(admin_user: dict = Depends(require_admin)):
     """Get summary counts for the admin dashboard"""
     conn = None
     cursor = None
@@ -68,7 +51,7 @@ def get_admin_overview(admin_user: dict = Depends(verify_admin)):
 
 
 @router.get("/customers")
-def list_customers(admin_user: dict = Depends(verify_admin)):
+def list_customers(admin_user: dict = Depends(require_admin)):
     """Get all customers for the admin panel"""
     conn = None
     cursor = None
@@ -100,7 +83,7 @@ def list_customers(admin_user: dict = Depends(verify_admin)):
 
 
 @router.delete("/customers/{user_id}")
-def delete_customer(user_id: int, admin_user: dict = Depends(verify_admin)):
+def delete_customer(user_id: int, admin_user: dict = Depends(require_admin)):
     """Delete a customer account. Blocked if the customer has existing orders."""
     conn = None
     cursor = None
@@ -146,7 +129,7 @@ def delete_customer(user_id: int, admin_user: dict = Depends(verify_admin)):
 
 
 @router.get("/orders")
-def list_orders(admin_user: dict = Depends(verify_admin)):
+def list_orders(admin_user: dict = Depends(require_admin)):
     """Get all subscriptions/orders for the admin panel"""
     conn = None
     cursor = None
@@ -181,7 +164,7 @@ def list_orders(admin_user: dict = Depends(verify_admin)):
 
 
 @router.get("/restaurants", response_model=list[RestaurantDetailResponse])
-def list_all_restaurants(status: str = None, admin_user: dict = Depends(verify_admin)):
+def list_all_restaurants(status: str = None, admin_user: dict = Depends(require_admin)):
     """List all restaurants with their approval status"""
     if status and status.lower() not in ("pending", "approved", "rejected"):
         raise HTTPException(
@@ -255,7 +238,7 @@ def list_all_restaurants(status: str = None, admin_user: dict = Depends(verify_a
 
 
 @router.get("/restaurants/pending", response_model=list[RestaurantListResponse])
-def list_pending_restaurants(admin_user: dict = Depends(verify_admin)):
+def list_pending_restaurants(admin_user: dict = Depends(require_admin)):
     """List pending restaurants awaiting approval"""
     conn = None
     cursor = None
@@ -295,7 +278,7 @@ def list_pending_restaurants(admin_user: dict = Depends(verify_admin)):
 def update_restaurant_status(
     restaurant_id: int,
     request: UpdateRestaurantStatusRequest,
-    admin_user: dict = Depends(verify_admin)
+    admin_user: dict = Depends(require_admin)
 ):
     """Approve or reject a restaurant"""
     if request.status == RestaurantStatus.rejected and not request.rejection_reason:
