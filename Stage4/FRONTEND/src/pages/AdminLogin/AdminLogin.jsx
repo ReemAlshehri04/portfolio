@@ -65,9 +65,6 @@ function AdminLogin() {
           <div className="al-blob-2" />
 
           <div className="al-card">
-            <div className="al-icon">
-              <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>lock</span>
-            </div>
             <h1 className="al-title">Admin Portal — Qooti</h1>
             <p className="al-subtitle">Welcome back. Please authenticate to access the dashboard.</p>
 

@@ -297,8 +297,8 @@
   padding: 80px 64px;
 }
 .rst-banner {
-  background: #325f3f;
-  color: #fff;
+  background: #d9f2d6;
+  color: #1a1c19;
   border-radius: 24px;
   padding: 56px;
   position: relative;
@@ -313,13 +313,13 @@
 .rst-banner-text {
   font-size: 16px;
   line-height: 1.7;
-  opacity: 0.9;
+  opacity: 0.85;
   max-width: 640px;
   margin-bottom: 28px;
 }
 .rst-banner-btn {
-  background: #fff;
-  color: #325f3f;
+  background: #325f3f;
+  color: #fff;
   border: none;
   padding: 14px 28px;
   border-radius: 9999px;

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { loginUser, roleHome } from "../../services/auth";
 import { useAuth } from "../../context/AuthContext";
+import QootiLogo from "../../components/QootiLogo/QootiLogo";
 
 function Login() {
   const navigate = useNavigate();
@@ -73,6 +74,9 @@ function Login() {
         <main className="login-main">
           <section className="login-right">
             <div className="login-right-inner">
+              <div style={{ marginBottom: "16px" }}>
+                <QootiLogo scale={0.45} />
+              </div>
               <h2 className="login-title">Welcome back</h2>
               <p className="login-subtitle">
                 Sign in to your account to continue your wellness journey.

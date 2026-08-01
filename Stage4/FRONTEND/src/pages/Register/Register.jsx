@@ -2,6 +2,7 @@ import "./Register.css";
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { registerUser } from "../../services/auth";
+import QootiLogo from "../../components/QootiLogo/QootiLogo";
 function Register() {
   const navigate = useNavigate();
   const [errors, setErrors] = useState({});
@@ -130,6 +131,9 @@ function Register() {
             </div>
 
             <div className="qp-card">
+              <div style={{ marginBottom: "16px" }}>
+                <QootiLogo scale={0.45} />
+              </div>
               <h2 className="qp-card-title">Create Account</h2>
               <p className="qp-card-sub">
                 Enter your details to begin your transformation.

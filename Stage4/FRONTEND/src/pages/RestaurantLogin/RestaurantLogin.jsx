@@ -41,7 +41,7 @@ function RestaurantLogin() {
       <style>{`
         .rl-body { background: #fafaf4; color: #1a1c19; font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh; }
         .rl-main { display: flex; min-height: 100vh; }
-        .rl-left { position: relative; width: 40%; background: #325f3f; display: flex; flex-direction: column; justify-content: center; padding: 0 64px; color: #fff; }
+        .rl-left { position: relative; width: 40%; background: #d9f2d6; display: flex; flex-direction: column; justify-content: center; padding: 0 64px; color: #1a1c19; }
         .rl-logo-top { position: absolute; top: 48px; left: 64px; font-family: 'Hanken Grotesk', sans-serif; font-size: 24px; font-weight: 700; }
         .rl-left-title { font-family: 'Hanken Grotesk', sans-serif; font-size: 40px; font-weight: 700; line-height: 1.2; }
         .rl-left-desc { font-size: 16px; opacity: 0.85; margin-top: 16px; max-width: 380px; }
