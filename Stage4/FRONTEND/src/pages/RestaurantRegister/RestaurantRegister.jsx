@@ -32,6 +32,10 @@ function RestaurantRegister() {
     e.preventDefault();
     setError("");
 
+    if (!/^[a-zA-Z0-9._%+-]+@restaurant\.com$/i.test(formData.email.trim())) {
+      setError("Please use a restaurant.com email address to register as a restaurant.");
+      return;
+    }
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match.");
       return;

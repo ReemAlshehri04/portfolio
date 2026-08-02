@@ -46,6 +46,12 @@ function Login() {
 
     try {
       const data = await loginUser(formData);
+
+      if (data.user.user_type === "restaurant") {
+        setError("Restaurant accounts must sign in from the Restaurant Login page.");
+        return;
+      }
+
       login(data.access_token, data.user);
 
       const redirectTo = location.state?.redirectTo;
