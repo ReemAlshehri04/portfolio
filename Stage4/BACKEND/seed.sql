@@ -13,7 +13,7 @@ VALUES (
     '+966501234567'
 );
 
--- client login
+-- client login: badriahfoodi@gmail.com / n0ricen0life!
 INSERT INTO app_user (
     user_type, full_name, email, password_hash, phone,
     age, gender, height_cm, weight_kg, health_goal, address
@@ -70,7 +70,7 @@ VALUES
     );
 
 -- ============================================================
--- QOOTI RESTAURANT
+-- QOOTI RESTAURANT: qooti.owner@restaurant.com
 -- ============================================================
 INSERT INTO meal (
     restaurant_id, name, description, ingredients, calories,
@@ -99,7 +99,7 @@ VALUES
     );
 
 -- ============================================================
--- GREEN FORK BISTRO
+-- GREEN FORK BISTRO: greenfork.owner@restaurant.com
 -- ============================================================
 INSERT INTO meal (restaurant_id, name, description, ingredients, calories, protein_g, carbs_g, fats_g, tags, image_url)
 VALUES
@@ -129,7 +129,7 @@ VALUES
     );
 
 -- ============================================================
--- GREEN BOWL
+-- GREEN BOWL: greenbowl.owner@restaurant.com
 -- ============================================================
 INSERT INTO meal (restaurant_id, name, ingredients, calories, protein_g, carbs_g, fats_g, tags, image_url)
 VALUES
@@ -140,7 +140,7 @@ VALUES
     ((SELECT restaurant_id FROM restaurant WHERE restaurant_name = 'Green Bowl'), 'Turkey Lettuce Wrap Plate', 'Ground turkey, lettuce cups, shredded carrots, sweet chili sauce', 360, 30.00, 20.00, 16.00, ARRAY['GlutenFree', 'DairyFree'], 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=800&h=600&fit=crop');
 
 -- ============================================================
--- FIT KITCHEN
+-- FIT KITCHEN: fitkitchen.owner@restaurant.com
 -- ============================================================
 INSERT INTO meal (restaurant_id, name, ingredients, calories, protein_g, carbs_g, fats_g, tags, image_url)
 VALUES
