@@ -13,7 +13,7 @@ VALUES (
     '+966501234567'
 );
 
--- Test client login: client@example.com / Restaurant123!
+-- client login
 INSERT INTO app_user (
     user_type, full_name, email, password_hash, phone,
     age, gender, height_cm, weight_kg, health_goal, address
@@ -21,8 +21,8 @@ INSERT INTO app_user (
 VALUES (
     'client',
     'Test Client',
-    'client@example.com',
-    '$argon2id$v=19$m=65536,t=3,p=4$3dubU2otpfQeg1BKSSnFuA$orMI0X8GYVn0yvN9fUAEvmBmeha7KwpIV5KKUD500nM',
+    'badriahfoodi@gmail.com',
+    '$argon2id$v=19$m=65536,t=3,p=4$1DoHgNB6710LYcy5935vDQ$WVtMGW8WR49UyVUCRJzI8+bu2GYTCYYrBXJPArHQc78',
     '+966505000001',
     30, 'female', 165.00, 65.00, 'maintain', 'Riyadh, Saudi Arabia'
 );
@@ -30,10 +30,10 @@ VALUES (
 -- Restaurant-owner login for all accounts below: Restaurant123!
 INSERT INTO app_user (user_type, full_name, email, password_hash, phone)
 VALUES
-    ('restaurant', 'Qooti Restaurant Owner', 'qooti.owner@example.com', '$argon2id$v=19$m=65536,t=3,p=4$3dubU2otpfQeg1BKSSnFuA$orMI0X8GYVn0yvN9fUAEvmBmeha7KwpIV5KKUD500nM', '+966505000002'),
-    ('restaurant', 'Yousef Al-Ghamdi', 'greenfork.owner@example.com', '$argon2id$v=19$m=65536,t=3,p=4$3dubU2otpfQeg1BKSSnFuA$orMI0X8GYVn0yvN9fUAEvmBmeha7KwpIV5KKUD500nM', '+966504567890'),
-    ('restaurant', 'Sara Al-Fahad', 'greenbowl.owner@example.com', '$argon2id$v=19$m=65536,t=3,p=4$3dubU2otpfQeg1BKSSnFuA$orMI0X8GYVn0yvN9fUAEvmBmeha7KwpIV5KKUD500nM', '+966502345678'),
-    ('restaurant', 'Faisal Al-Mutairi', 'fitkitchen.owner@example.com', '$argon2id$v=19$m=65536,t=3,p=4$3dubU2otpfQeg1BKSSnFuA$orMI0X8GYVn0yvN9fUAEvmBmeha7KwpIV5KKUD500nM', '+966503456789');
+    ('restaurant', 'Qooti Restaurant Owner', 'qooti.owner@restaurant.com', '$argon2id$v=19$m=65536,t=3,p=4$3dubU2otpfQeg1BKSSnFuA$orMI0X8GYVn0yvN9fUAEvmBmeha7KwpIV5KKUD500nM', '+966505000002'),
+    ('restaurant', 'Yousef Al-Ghamdi', 'greenfork.owner@restaurant.com', '$argon2id$v=19$m=65536,t=3,p=4$3dubU2otpfQeg1BKSSnFuA$orMI0X8GYVn0yvN9fUAEvmBmeha7KwpIV5KKUD500nM', '+966504567890'),
+    ('restaurant', 'Sara Al-Fahad', 'greenbowl.owner@restaurant.com', '$argon2id$v=19$m=65536,t=3,p=4$3dubU2otpfQeg1BKSSnFuA$orMI0X8GYVn0yvN9fUAEvmBmeha7KwpIV5KKUD500nM', '+966502345678'),
+    ('restaurant', 'Faisal Al-Mutairi', 'fitkitchen.owner@restaurant.com', '$argon2id$v=19$m=65536,t=3,p=4$3dubU2otpfQeg1BKSSnFuA$orMI0X8GYVn0yvN9fUAEvmBmeha7KwpIV5KKUD500nM', '+966503456789');
 
 -- ============================================================
 -- RESTAURANTS
@@ -41,28 +41,28 @@ VALUES
 INSERT INTO restaurant (user_id, restaurant_name, description, logo_url, is_verified)
 VALUES
     (
-        (SELECT user_id FROM app_user WHERE email = 'qooti.owner@example.com'),
+        (SELECT user_id FROM app_user WHERE email = 'qooti.owner@restaurant.com'),
         'Qooti Restaurant',
         'Restaurant for testing meal APIs',
         NULL,
         TRUE
     ),
     (
-        (SELECT user_id FROM app_user WHERE email = 'greenfork.owner@example.com'),
+        (SELECT user_id FROM app_user WHERE email = 'greenfork.owner@restaurant.com'),
         'Green Fork Bistro',
         'Health-focused Mediterranean cuisine made with seasonal, locally-sourced ingredients.',
         'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=400&fit=crop',
         TRUE
     ),
     (
-        (SELECT user_id FROM app_user WHERE email = 'greenbowl.owner@example.com'),
+        (SELECT user_id FROM app_user WHERE email = 'greenbowl.owner@restaurant.com'),
         'Green Bowl',
         'Fresh, plant-forward healthy lunch bowls.',
         'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&h=400&fit=crop',
         TRUE
     ),
     (
-        (SELECT user_id FROM app_user WHERE email = 'fitkitchen.owner@example.com'),
+        (SELECT user_id FROM app_user WHERE email = 'fitkitchen.owner@restaurant.com'),
         'Fit Kitchen',
         'High-protein, macro-balanced meals for active lifestyles.',
         'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400&h=400&fit=crop',
@@ -70,7 +70,7 @@ VALUES
     );
 
 -- ============================================================
--- QOOTI RESTAURANT MEALS
+-- QOOTI RESTAURANT
 -- ============================================================
 INSERT INTO meal (
     restaurant_id, name, description, ingredients, calories,
@@ -99,7 +99,7 @@ VALUES
     );
 
 -- ============================================================
--- GREEN FORK BISTRO MEALS
+-- GREEN FORK BISTRO
 -- ============================================================
 INSERT INTO meal (restaurant_id, name, description, ingredients, calories, protein_g, carbs_g, fats_g, tags, image_url)
 VALUES
@@ -129,7 +129,7 @@ VALUES
     );
 
 -- ============================================================
--- GREEN BOWL MEALS
+-- GREEN BOWL
 -- ============================================================
 INSERT INTO meal (restaurant_id, name, ingredients, calories, protein_g, carbs_g, fats_g, tags, image_url)
 VALUES
@@ -140,7 +140,7 @@ VALUES
     ((SELECT restaurant_id FROM restaurant WHERE restaurant_name = 'Green Bowl'), 'Turkey Lettuce Wrap Plate', 'Ground turkey, lettuce cups, shredded carrots, sweet chili sauce', 360, 30.00, 20.00, 16.00, ARRAY['GlutenFree', 'DairyFree'], 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=800&h=600&fit=crop');
 
 -- ============================================================
--- FIT KITCHEN MEALS
+-- FIT KITCHEN
 -- ============================================================
 INSERT INTO meal (restaurant_id, name, ingredients, calories, protein_g, carbs_g, fats_g, tags, image_url)
 VALUES
@@ -168,13 +168,13 @@ INSERT INTO subscription (
 )
 VALUES
     (
-        (SELECT user_id FROM app_user WHERE email = 'client@example.com'),
+        (SELECT user_id FROM app_user WHERE email = 'badriahfoodi@gmail.com'),
         NULL, '2026-07-12', '2026-07-16', '13:00:00',
         100.00, 0.00, 100.00, 'confirmed', FALSE,
         '2026-07-08 20:53:20.033913'
     ),
     (
-        (SELECT user_id FROM app_user WHERE email = 'client@example.com'),
+        (SELECT user_id FROM app_user WHERE email = 'badriahfoodi@gmail.com'),
         NULL, '2026-07-19', '2026-07-23', '13:00:00',
         100.00, 0.00, 100.00, 'confirmed', FALSE,
         '2026-07-09 19:25:04.744757'
@@ -189,7 +189,7 @@ VALUES
         (
             SELECT subscription_id
             FROM subscription
-            WHERE user_id = (SELECT user_id FROM app_user WHERE email = 'client@example.com')
+            WHERE user_id = (SELECT user_id FROM app_user WHERE email = 'badriahfoodi@gmail.com')
               AND start_date = '2026-07-12'
         ),
         (
@@ -206,7 +206,7 @@ VALUES
         (
             SELECT subscription_id
             FROM subscription
-            WHERE user_id = (SELECT user_id FROM app_user WHERE email = 'client@example.com')
+            WHERE user_id = (SELECT user_id FROM app_user WHERE email = 'badriahfoodi@gmail.com')
               AND start_date = '2026-07-12'
         ),
         (

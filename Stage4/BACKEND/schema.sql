@@ -73,14 +73,14 @@ CREATE TABLE app_user (
     created_at      TIMESTAMP               NOT NULL DEFAULT NOW(),
     is_active       BOOLEAN                 NOT NULL DEFAULT TRUE,
 
-    -- Health profile (client only — NULL for restaurant and admin)
+    -- Health profile (client only)
     age             INT                     DEFAULT NULL,
     gender          gender_enum             DEFAULT NULL,
     height_cm       DECIMAL(5,2)            DEFAULT NULL,
     weight_kg       DECIMAL(5,2)            DEFAULT NULL,
     health_goal     health_goal_enum        DEFAULT NULL,
 
-    -- Address (client only — NULL for restaurant and admin)
+    -- Address (client only)
     address         VARCHAR(255)            DEFAULT NULL,
 
     CONSTRAINT pk_app_user PRIMARY KEY (user_id),
@@ -118,7 +118,6 @@ CREATE TABLE restaurant (
 
 -- ============================================================
 -- meal
--- Depends on: restaurant
 -- ============================================================
 CREATE TABLE meal (
     meal_id         SERIAL          NOT NULL,
@@ -145,7 +144,6 @@ CREATE TABLE meal (
 
 -- ============================================================
 -- subscription
--- Depends on: app_user, discount_code
 -- ============================================================
 CREATE TABLE subscription (
     subscription_id     SERIAL                      NOT NULL,
@@ -178,7 +176,6 @@ CREATE TABLE subscription (
 
 -- ============================================================
 -- order_item
--- Depends on: subscription, meal
 -- ============================================================
 CREATE TABLE order_item (
     order_item_id   SERIAL                      NOT NULL,
@@ -205,7 +202,6 @@ CREATE TABLE order_item (
 
 -- ============================================================
 -- payment
--- Depends on: subscription
 -- ============================================================
 CREATE TABLE payment (
     payment_id          SERIAL                  NOT NULL,

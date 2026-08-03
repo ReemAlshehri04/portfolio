@@ -16,13 +16,12 @@ router = APIRouter(
 
 MOYASAR_API_BASE_URL = "https://api.moyasar.com/v1"
 
-
+# Define the original price of the subscription as a constant
 def _result_redirect(**params) -> RedirectResponse:
     """Send the customer's browser to the frontend payment-result page."""
     frontend = os.getenv("FRONTEND_BASE_URL", "http://localhost:5173")
     query = urlencode({k: v for k, v in params.items() if v is not None})
     return RedirectResponse(f"{frontend}/payment-result?{query}")
-
 
 def moyasar_auth():
     """Return (secret_key, base_url) for Moyasar, or fail loudly if unconfigured"""
@@ -36,7 +35,7 @@ def moyasar_auth():
         )
     return secret, base_url
 
-
+# Moyasar payment functions
 def moyasar_create_payment(amount_sar, description, request: PaymentProcessRequest):
     """
     Create a payment at Moyasar (credit card, 3D Secure).
@@ -94,6 +93,7 @@ def moyasar_create_payment(amount_sar, description, request: PaymentProcessReque
     return data
 
 
+# always fetch the real status from Moyasar server-to-server.
 def moyasar_fetch_payment(moyasar_payment_id):
     """Fetch a payment from Moyasar to verify its real status (never trust the browser)"""
     secret, base_url = moyasar_auth()
@@ -174,6 +174,7 @@ def process_payment(
                 detail=f"Payment is already {payment['payment_status']}"
             )
 
+        # Create the payment at Moyasar
         moyasar_payment = moyasar_create_payment(
             amount_sar=float(payment["amount"]),
             description=f"Qooti subscription #{request.subscription_id}",
@@ -182,7 +183,6 @@ def process_payment(
 
         transaction_url = (moyasar_payment.get("source") or {}).get("transaction_url")
 
-        # Store the Moyasar payment id now so the callback can find this row.
         # payment_status stays 'pending' until 3D Secure completes.
         cursor.execute(
             """
@@ -268,7 +268,7 @@ def payment_callback(id: str = None, status: str = None, message: str = None):
             return _result_redirect(status="success", subscription_id=payment["subscription_id"])
 
         if real_status == "paid":
-            # Transaction: payment success + subscription confirmation together
+            # payment success + subscription confirmation together
             cursor.execute(
                 """
                 UPDATE payment
@@ -310,7 +310,7 @@ def payment_callback(id: str = None, status: str = None, message: str = None):
                 message=failure_message
             )
 
-        # Still 'initiated' or 'authorized' — 3D Secure not finished yet
+
         return _result_redirect(
             status="pending",
             subscription_id=payment["subscription_id"]

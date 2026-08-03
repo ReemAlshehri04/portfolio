@@ -1,5 +1,4 @@
 from decimal import Decimal, ROUND_HALF_UP
-
 from fastapi import APIRouter, HTTPException, Depends
 from database import get_db_connection
 from schemas import SubscriptionCreateRequest, SubscriptionCreateResponse
@@ -10,8 +9,7 @@ router = APIRouter(
     tags=["Subscriptions"]
 )
 
-# Team decision (sprint plan Option A): fixed price per subscription until
-# meal prices are added to the schema
+# Define the original price of the subscription as a constant
 ORIGINAL_PRICE = Decimal("250.00")
 
 
@@ -82,6 +80,7 @@ def get_user_subscriptions(
             conn.close()
 
 
+# Get subscription schedule
 @router.get("/{subscription_id}/schedule")
 def get_subscription_schedule(
     subscription_id: int,
@@ -179,7 +178,7 @@ def create_subscription(
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        # Discount lookup (outside the write transaction - read only)
+        # Validate discount code if provided
         discount_amount = Decimal("0.00")
         if request.discount_code_id is not None:
             cursor.execute(
@@ -207,7 +206,7 @@ def create_subscription(
 
         final_price = ORIGINAL_PRICE - discount_amount
 
-        # Transaction: subscription + pending payment must commit together
+        # Create subscription and payment in a single transaction
         cursor.execute(
             """
             INSERT INTO subscription (

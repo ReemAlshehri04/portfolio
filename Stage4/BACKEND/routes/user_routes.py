@@ -6,7 +6,6 @@ from auth import get_current_user
 
 router = APIRouter(prefix="/api/users", tags=["Users"])
 
-
 class UpdateProfileRequest(BaseModel):
     full_name: Optional[str] = None
     phone: Optional[str] = None
@@ -23,7 +22,7 @@ PROFILE_FIELDS = """
     height_cm, weight_kg, health_goal, address, created_at
 """
 
-
+# Get current user's profile
 @router.get("/me")
 def get_my_profile(current_user: dict = Depends(get_current_user)):
     conn = None
@@ -48,7 +47,6 @@ def get_my_profile(current_user: dict = Depends(get_current_user)):
             cursor.close()
         if conn:
             conn.close()
-
 
 @router.put("/me")
 def update_my_profile(payload: UpdateProfileRequest, current_user: dict = Depends(get_current_user)):
