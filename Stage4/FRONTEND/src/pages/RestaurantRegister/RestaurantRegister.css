@@ -1,0 +1,27 @@
+.pr-body { background: #fafaf4; color: #1a1c19; font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh; }
+.pr-main { display: flex; min-height: 100vh; }
+.pr-left { position: relative; width: 40%; background: #d9f2d6; display: flex; flex-direction: column; justify-content: center; padding: 0 64px; color: #1a1c19; }
+.pr-logo-top { position: absolute; top: 48px; left: 64px; font-family: 'Hanken Grotesk', sans-serif; font-size: 24px; font-weight: 700; }
+.pr-left-title { font-family: 'Hanken Grotesk', sans-serif; font-size: 40px; font-weight: 700; line-height: 1.2; }
+.pr-left-desc { font-size: 16px; opacity: 0.85; margin-top: 16px; max-width: 380px; }
+.pr-stats { display: flex; gap: 40px; margin-top: 40px; }
+.pr-stat-num { font-size: 28px; font-weight: 700; }
+.pr-stat-label { font-size: 12px; text-transform: uppercase; opacity: 0.8; letter-spacing: 0.05em; }
+.pr-right { width: 60%; display: flex; align-items: center; justify-content: center; padding: 48px; }
+.pr-card { width: 100%; max-width: 480px; }
+.pr-card-title { font-family: 'Hanken Grotesk', sans-serif; font-size: 28px; font-weight: 600; }
+.pr-card-sub { font-size: 14px; color: #5e5e5b; margin-top: 4px; margin-bottom: 24px; }
+.pr-form { display: flex; flex-direction: column; gap: 16px; }
+.pr-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.pr-field { display: flex; flex-direction: column; gap: 6px; }
+.pr-label { font-size: 13px; font-weight: 600; color: #414941; }
+.pr-input, .pr-textarea { width: 100%; padding: 12px 16px; border-radius: 10px; background: #f4f4ee; border: 2px solid transparent; font-size: 15px; box-sizing: border-box; font-family: inherit; }
+.pr-input:focus, .pr-textarea:focus { outline: none; border-color: #325f3f; background: #fff; }
+.pr-textarea { resize: vertical; min-height: 80px; }
+.pr-dropzone { border: 2px dashed #c1c9bf; border-radius: 10px; padding: 20px; text-align: center; font-size: 13px; color: #717971; cursor: pointer; }
+.pr-checkbox-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #414941; }
+.pr-error { font-size: 13px; color: #b3261e; }
+.pr-submit { width: 100%; background: #325f3f; color: #fff; height: 52px; border-radius: 9999px; border: none; font-size: 16px; font-weight: 600; cursor: pointer; }
+.pr-submit:disabled { opacity: 0.7; cursor: not-allowed; }
+.pr-footer-link { text-align: center; font-size: 14px; margin-top: 20px; }
+.pr-footer-link a { color: #325f3f; font-weight: 600; text-decoration: none; }

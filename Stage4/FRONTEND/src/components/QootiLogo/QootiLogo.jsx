@@ -1,11 +1,5 @@
 import React from 'react';
 
-/**
- * QootiLogo Component
- * Renders the traced Qooti logo mark (forest-green wordmark/vine, transparent background).
- * `scale` is relative to a 160px-square base; `size` overrides it directly in px.
- * `color` overrides the fill — pass white when placing it on a dark/green panel.
- */
 const QootiLogo = ({ scale = 1, size, color = '#1F4A2E' }) => {
   const px = size ?? 160 * scale;
 

@@ -1,0 +1,23 @@
+.rl-body { background: #fafaf4; color: #1a1c19; font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh; }
+.rl-main { display: flex; min-height: 100vh; }
+.rl-left { position: relative; width: 40%; background: #d9f2d6; display: flex; flex-direction: column; justify-content: center; padding: 0 64px; color: #1a1c19; }
+.rl-logo-top { position: absolute; top: 48px; left: 64px; font-family: 'Hanken Grotesk', sans-serif; font-size: 24px; font-weight: 700; }
+.rl-left-title { font-family: 'Hanken Grotesk', sans-serif; font-size: 40px; font-weight: 700; line-height: 1.2; }
+.rl-left-desc { font-size: 16px; opacity: 0.85; margin-top: 16px; max-width: 380px; }
+.rl-stats { display: flex; gap: 40px; margin-top: 40px; }
+.rl-stat-num { font-size: 28px; font-weight: 700; }
+.rl-stat-label { font-size: 12px; text-transform: uppercase; opacity: 0.8; letter-spacing: 0.05em; }
+.rl-right { width: 60%; display: flex; align-items: center; justify-content: center; padding: 48px; }
+.rl-card { width: 100%; max-width: 400px; }
+.rl-card-title { font-family: 'Hanken Grotesk', sans-serif; font-size: 28px; font-weight: 600; }
+.rl-card-sub { font-size: 14px; color: #5e5e5b; margin-top: 4px; margin-bottom: 24px; }
+.rl-form { display: flex; flex-direction: column; gap: 16px; }
+.rl-field { display: flex; flex-direction: column; gap: 6px; }
+.rl-label { font-size: 13px; font-weight: 600; color: #414941; }
+.rl-input { width: 100%; padding: 12px 16px; border-radius: 10px; background: #f4f4ee; border: 2px solid transparent; font-size: 15px; box-sizing: border-box; font-family: inherit; }
+.rl-input:focus { outline: none; border-color: #325f3f; background: #fff; }
+.rl-error { font-size: 13px; color: #b3261e; }
+.rl-submit { width: 100%; background: #325f3f; color: #fff; height: 52px; border-radius: 9999px; border: none; font-size: 16px; font-weight: 600; cursor: pointer; }
+.rl-submit:disabled { opacity: 0.7; cursor: not-allowed; }
+.rl-footer-link { text-align: center; font-size: 14px; margin-top: 20px; }
+.rl-footer-link a { color: #325f3f; font-weight: 600; text-decoration: none; }

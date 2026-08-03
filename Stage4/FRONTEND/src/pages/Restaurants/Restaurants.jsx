@@ -50,7 +50,6 @@ function Restaurants() {
 
       
       <div className="rst-body">
-        {/* Navbar */}
         <nav className="rst-nav">
           <div className="rst-nav-inner">
             <Link to="/" className="rst-logo"><QootiLogo scale={0.6} /></Link>

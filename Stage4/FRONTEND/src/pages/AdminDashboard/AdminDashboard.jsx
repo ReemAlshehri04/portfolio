@@ -73,7 +73,6 @@ function AdminDashboard() {
       <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
 
       <div className="admin-body">
-        {/* Sidebar */}
         <aside className="admin-sidebar">
           <div className="admin-logo" style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <QootiLogo scale={0.6} /> Admin
@@ -104,14 +103,12 @@ function AdminDashboard() {
           </div>
         </aside>
 
-        {/* Main Content */}
         <main className="admin-main">
           <div className="admin-header">
             <h1>Admin Overview</h1>
             <p>Welcome back — here's what's happening on Qooti today.</p>
           </div>
 
-          {/* Stats */}
           <div className="stats-grid">
             <div className="stat-card">
               <div className="stat-icon green">
@@ -143,7 +140,6 @@ function AdminDashboard() {
             </div>
           </div>
 
-          {/* Quick Actions */}
           <p className="section-title">Quick Actions</p>
           <div className="quick-actions">
             <a href="/admin/pending-restaurants" className="action-card">
@@ -175,7 +171,6 @@ function AdminDashboard() {
             </a>
           </div>
 
-          {/* Restaurants */}
           <p className="section-title">Restaurants</p>
           <div className="section-card">
             {restaurantsError ? (

@@ -37,7 +37,6 @@ export function getCurrentUser() {
   return user ? JSON.parse(user) : null;
 }
 
-// Landing route for a user based on their role, used for post-login redirect.
 export function roleHome(userType) {
   switch (userType) {
     case "restaurant":
@@ -49,7 +48,6 @@ export function roleHome(userType) {
   }
 }
 
-// Public GET (no auth header) — for endpoints that don't require a token.
 export async function apiGet(path) {
   const res = await fetch(`${API_BASE_URL}${path}`);
   const data = await res.json();

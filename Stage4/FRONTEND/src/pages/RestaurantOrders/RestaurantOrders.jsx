@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { authRequest } from "../../services/auth";
 import { useAuth } from "../../context/AuthContext";
 import QootiLogo from "../../components/QootiLogo/QootiLogo";
+import "./RestaurantOrders.css";
 
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"];
 
@@ -62,47 +63,6 @@ function RestaurantOrders() {
     <>
       <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
       <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
-
-      <style>{`
-        * { box-sizing: border-box; }
-        .ro-body { background: #fafaf4; font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh; display: flex; color: #1a1c19; }
-
-        .ro-sidebar { width: 240px; background: #fff; border-right: 1px solid #e8ebe8; display: flex; flex-direction: column; padding: 24px 0; position: fixed; height: 100vh; }
-        .ro-logo { font-family: 'Hanken Grotesk', sans-serif; font-size: 20px; font-weight: 700; color: #325f3f; padding: 0 20px 20px; border-bottom: 1px solid #e8ebe8; }
-        .ro-logo small { display: block; font-size: 11px; font-weight: 500; color: #717971; margin-top: 2px; }
-        .ro-nav { display: flex; flex-direction: column; gap: 4px; padding: 16px 10px; flex: 1; }
-        .ro-nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 10px; font-size: 14px; font-weight: 500; color: #414941; text-decoration: none; }
-        .ro-nav-item:hover { background: #f4f4ee; color: #325f3f; }
-        .ro-nav-item.active { background: #e8f5e9; color: #325f3f; font-weight: 600; }
-        .ro-add-btn { margin: 8px 10px; background: #325f3f; color: #fff; border: none; border-radius: 9999px; padding: 10px 16px; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; text-align: center; }
-        .ro-sidebar-footer { padding: 12px 20px; border-top: 1px solid #e8ebe8; }
-        .ro-logout-btn { background: none; border: none; color: #b3261e; font-size: 13px; font-weight: 600; cursor: pointer; padding: 0; }
-
-        .ro-main { margin-left: 240px; flex: 1; padding: 32px 40px; }
-        .ro-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
-        .ro-title { font-family: 'Hanken Grotesk', sans-serif; font-size: 26px; font-weight: 700; margin-bottom: 4px; }
-        .ro-subtitle { font-size: 14px; color: #5e5e5b; }
-        .ro-user { font-size: 13px; color: #414941; font-weight: 600; }
-
-        .ro-day-tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
-        .ro-day-tab { background: #fff; border: none; box-shadow: 0 2px 12px rgba(26,28,25,0.04); border-radius: 9999px; padding: 10px 20px; font-size: 14px; font-weight: 600; color: #414941; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
-        .ro-day-tab:hover { box-shadow: 0 2px 12px rgba(26,28,25,0.1); }
-        .ro-day-tab.active { background: #325f3f; color: #fff; box-shadow: none; }
-        .ro-day-count { font-size: 11px; opacity: 0.8; }
-
-        .ro-section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
-        .ro-section-title { font-family: 'Hanken Grotesk', sans-serif; font-size: 18px; font-weight: 700; }
-        .ro-search { padding: 10px 16px; border-radius: 9999px; background: #fff; border: none; box-shadow: 0 2px 12px rgba(26,28,25,0.04); font-size: 14px; width: 240px; font-family: inherit; }
-        .ro-search:focus { outline: none; box-shadow: 0 0 0 2px #325f3f; }
-
-        .ro-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 28px; overflow: hidden; box-shadow: 0 2px 12px rgba(26,28,25,0.04); }
-        .ro-table th { background: #fafaf4; text-align: left; padding: 14px 24px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: #717971; }
-        .ro-table td { padding: 14px 24px; border-top: 1px solid #f4f4ee; font-size: 14px; }
-        .ro-status-pill { font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 9999px; background: #e6f4ea; color: #188038; text-transform: capitalize; }
-        .ro-error { color: #b3261e; font-size: 14px; margin-bottom: 16px; }
-        .ro-empty { background: #fff; border: none; box-shadow: 0 2px 12px rgba(26,28,25,0.04); border-radius: 28px; padding: 40px; text-align: center; color: #717971; }
-        .material-symbols-outlined { font-variation-settings: 'FILL'0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; font-family: 'Material Symbols Outlined'; }
-      `}</style>
 
       <div className="ro-body">
         <aside className="ro-sidebar">
