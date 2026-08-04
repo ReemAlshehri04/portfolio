@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import QootiLogo from "../QootiLogo/QootiLogo";
+import qootiLogo from "../../assets/qooti-logo.svg";
 import "./Navbar.css";
 
 function Navbar({transparent = false}) {
@@ -16,7 +16,7 @@ function Navbar({transparent = false}) {
     <nav className={`navbar ${transparent ? "navbar-transparent" : ""}`}>
       <div className="logo">
         <Link to="/" className="logo-link">
-          <QootiLogo scale={0.8} />
+          <img src={qootiLogo} alt="Qooti" style={{ width: 128, height: 128 }} />
         </Link>
       </div>
 

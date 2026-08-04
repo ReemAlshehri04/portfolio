@@ -1,14 +1,14 @@
 import "./Landing.css";
 import heroImage from "../../assets/landingpage.jpg";
 import {Link} from "react-router-dom";
-import QootiLogo from "../../components/QootiLogo/QootiLogo";
+import qootiLogo from "../../assets/qooti-logo.svg";
 function Landing() {
   return (
     <>
       <nav className="ld-nav">
         <div className="ld-nav-inner">
           <a href="#top" className="ld-logo">
-            <QootiLogo scale={0.8} />
+            <img src={qootiLogo} alt="Qooti" style={{ width: 128, height: 128 }} />
           </a>
           <ul className="ld-nav-links">
             <li>
@@ -232,7 +232,7 @@ function Landing() {
       <footer className="ld-footer">
         <div className="ld-wrap">
           <a href="#top" className="ld-logo">
-            <QootiLogo scale={0.8} />
+            <img src={qootiLogo} alt="Qooti" style={{ width: 128, height: 128 }} />
           </a>
           <ul className="ld-foot-links">
             <li>

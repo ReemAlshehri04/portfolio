@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { loginUser } from "../../services/auth";
 import { useAuth } from "../../context/AuthContext";
-import QootiLogo from "../../components/QootiLogo/QootiLogo";
+import qootiLogo from "../../assets/qooti-logo.svg";
 import "./AdminLogin.css";
 function AdminLogin() {
   const navigate = useNavigate();
@@ -52,7 +52,7 @@ function AdminLogin() {
       <div className="al-body">
         <nav className="al-nav">
           <div className="al-nav-inner">
-            <Link to="/" className="al-logo"><QootiLogo scale={0.6} /></Link>
+            <Link to="/" className="al-logo"><img src={qootiLogo} alt="Qooti" style={{ width: 96, height: 96 }} /></Link>
             <div className="al-nav-actions">
               <Link to="/login">Customer Login</Link>
               <Link to="/restaurant-login">Restaurant Login</Link>
@@ -136,7 +136,7 @@ function AdminLogin() {
         <footer className="al-footer">
           <div className="al-footer-inner">
             <div>
-              <div className="al-footer-logo"><QootiLogo scale={0.55} /></div>
+              <div className="al-footer-logo"><img src={qootiLogo} alt="Qooti" style={{ width: 88, height: 88 }} /></div>
               <p className="al-footer-desc">© 2026 Qooti. Effortless Health.</p>
             </div>
             <div>

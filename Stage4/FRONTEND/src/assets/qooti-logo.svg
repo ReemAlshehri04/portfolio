@@ -1,23 +1,12 @@
-import React from 'react';
-
-const QootiLogo = ({ scale = 1, size, color = '#1F4A2E' }) => {
-  const px = size ?? 160 * scale;
-
-  return (
-    <svg
-      viewBox="0 0 1024 1024"
-      width={px}
-      height={px}
-      style={{ display: 'inline-block', verticalAlign: 'middle' }}
-    >
-      <defs>
-        <mask id="qooti-q-counter">
-          <rect x="-10000" y="-10000" width="40000" height="40000" fill="#ffffff" />
-          <ellipse cx="2500" cy="5190" rx="550" ry="750" fill="#000000" />
-        </mask>
-      </defs>
-      <g fill={color} stroke="none" mask="url(#qooti-q-counter)" transform="translate(0.000000,1024.000000) scale(0.100000,-0.100000)">
-        <path d="M8763 6548 c14 -225 -41 -407 -161 -539 -90 -97 -216 -153 -385 -168
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <mask id="qooti-q-counter">
+      <rect x="-10000" y="-10000" width="40000" height="40000" fill="#ffffff" />
+      <ellipse cx="2500" cy="5190" rx="550" ry="750" fill="#000000" />
+    </mask>
+  </defs>
+  <g fill="#1F4A2E" stroke="none" mask="url(#qooti-q-counter)" transform="translate(0.000000,1024.000000) scale(0.100000,-0.100000)">
+    <path d="M8763 6548 c14 -225 -41 -407 -161 -539 -90 -97 -216 -153 -385 -168
 -55 -5 -114 -20 -177 -44 -126 -47 -229 -67 -345 -67 l-95 0 0 -35 0 -35 175
 0 175 0 0 -86 0 -86 -175 4 -176 3 3 -445 3 -445 28 -58 c34 -68 79 -97 152
 -97 56 0 100 18 147 58 l35 31 31 -38 31 -39 -30 -45 c-94 -143 -245 -216
@@ -67,12 +56,8 @@ c231 -78 385 -224 456 -432 l29 -86 -58 -94 c-157 -253 -284 -406 -402 -486
 -16 31 -26 32 -60 l2 -41 -308 0 -308 0 0 39 c0 32 6 43 34 65 21 15 42 45 53
 73 16 44 18 85 18 503 0 441 -1 456 -20 490 -12 19 -35 44 -52 55 -24 15 -32
 29 -35 57 -3 38 -3 38 47 53 27 8 120 37 205 64 159 51 219 61 238 38z" />
-        <path d="M2320 6037 c-140 -47 -232 -133 -305 -282 -135 -275 -120 -715 35
+    <path d="M2320 6037 c-140 -47 -232 -133 -305 -282 -135 -275 -120 -715 35
 -1030 118 -238 268 -347 480 -348 131 0 232 40 334 132 48 44 122 165 154 253
 82 226 82 537 0 788 -88 274 -214 429 -395 489 -87 29 -215 28 -303 -2z" />
-      </g>
-    </svg>
-  );
-};
-
-export default QootiLogo;
+  </g>
+</svg>

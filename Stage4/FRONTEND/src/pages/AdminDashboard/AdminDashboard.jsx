@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { authRequest } from "../../services/auth";
 import { useAuth } from "../../context/AuthContext";
-import QootiLogo from "../../components/QootiLogo/QootiLogo";
+import qootiLogo from "../../assets/qooti-logo.svg";
 import "./AdminDashboard.css";
 
 const RESTAURANT_STATUS_COLORS = {
@@ -75,7 +75,7 @@ function AdminDashboard() {
       <div className="admin-body">
         <aside className="admin-sidebar">
           <div className="admin-logo" style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <QootiLogo scale={0.6} /> Admin
+            <img src={qootiLogo} alt="Qooti" style={{ width: 96, height: 96 }} /> Admin
           </div>
           <nav className="admin-nav">
             <a href="/admin/dashboard" className="admin-nav-item active">

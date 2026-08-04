@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { apiGet } from "../../services/auth";
 import { useAuth } from "../../context/AuthContext";
-import QootiLogo from "../../components/QootiLogo/QootiLogo";
+import qootiLogo from "../../assets/qooti-logo.svg";
 
 const SHOWCASE_ICONS = ["eco", "water_drop", "local_dining", "spa"];
 const TAG_LABELS = { HighProtein: "High Protein", LowCarb: "Low Carb", GlutenFree: "Gluten Free" };
@@ -52,7 +52,7 @@ function Restaurants() {
       <div className="rst-body">
         <nav className="rst-nav">
           <div className="rst-nav-inner">
-            <Link to="/" className="rst-logo"><QootiLogo scale={0.6} /></Link>
+            <Link to="/" className="rst-logo"><img src={qootiLogo} alt="Qooti" style={{ width: 96, height: 96 }} /></Link>
             <div className="rst-nav-links">
               {user?.user_type !== "restaurant" && (
                 <>
@@ -207,7 +207,7 @@ function Restaurants() {
 
         <footer>
           <div className="rst-footer">
-            <div className="rst-logo"><QootiLogo scale={0.6} /></div>
+            <div className="rst-logo"><img src={qootiLogo} alt="Qooti" style={{ width: 96, height: 96 }} /></div>
             <div className="rst-footer-links">
               <a href="#">Privacy Policy</a>
               <a href="#">Terms of Service</a>

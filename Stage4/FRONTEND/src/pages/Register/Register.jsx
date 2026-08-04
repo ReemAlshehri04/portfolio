@@ -2,7 +2,7 @@ import "./Register.css";
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { registerUser } from "../../services/auth";
-import QootiLogo from "../../components/QootiLogo/QootiLogo";
+import qootiLogo from "../../assets/qooti-logo.svg";
 function Register() {
   const navigate = useNavigate();
   const [errors, setErrors] = useState({});
@@ -132,7 +132,7 @@ function Register() {
 
             <div className="qp-card">
               <div style={{ marginBottom: "16px" }}>
-                <QootiLogo scale={0.45} />
+                <img src={qootiLogo} alt="Qooti" style={{ width: 72, height: 72 }} />
               </div>
               <h2 className="qp-card-title">Create Account</h2>
               <p className="qp-card-sub">

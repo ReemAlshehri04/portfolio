@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { authRequest } from "../../services/auth";
 import { useAuth } from "../../context/AuthContext";
-import QootiLogo from "../../components/QootiLogo/QootiLogo";
+import qootiLogo from "../../assets/qooti-logo.svg";
 import "./RestaurantOrders.css";
 
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"];
@@ -67,7 +67,7 @@ function RestaurantOrders() {
       <div className="ro-body">
         <aside className="ro-sidebar">
           <div className="ro-logo">
-            <QootiLogo scale={0.55} />
+            <img src={qootiLogo} alt="Qooti" style={{ width: 88, height: 88 }} />
             <small>Partner Portal</small>
           </div>
           <nav className="ro-nav">

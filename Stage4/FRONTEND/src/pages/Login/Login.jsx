@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { loginUser, roleHome } from "../../services/auth";
 import { useAuth } from "../../context/AuthContext";
-import QootiLogo from "../../components/QootiLogo/QootiLogo";
+import qootiLogo from "../../assets/qooti-logo.svg";
 
 function Login() {
   const navigate = useNavigate();
@@ -81,7 +81,7 @@ function Login() {
           <section className="login-right">
             <div className="login-right-inner">
               <div style={{ marginBottom: "16px" }}>
-                <QootiLogo scale={0.45} />
+                <img src={qootiLogo} alt="Qooti" style={{ width: 72, height: 72 }} />
               </div>
               <h2 className="login-title">Welcome back</h2>
               <p className="login-subtitle">

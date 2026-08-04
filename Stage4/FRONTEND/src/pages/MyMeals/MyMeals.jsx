@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { authRequest } from "../../services/auth";
 import { useAuth } from "../../context/AuthContext";
-import QootiLogo from "../../components/QootiLogo/QootiLogo";
+import qootiLogo from "../../assets/qooti-logo.svg";
 import "./MyMeals.css";
 
 function MyMeals() {
@@ -71,7 +71,7 @@ function MyMeals() {
       <div className="mm-body">
         <aside className="mm-sidebar">
           <div className="mm-logo">
-            <QootiLogo scale={0.55} />
+            <img src={qootiLogo} alt="Qooti" style={{ width: 88, height: 88 }} />
             <small>Partner Portal</small>
           </div>
           <nav className="mm-nav">
